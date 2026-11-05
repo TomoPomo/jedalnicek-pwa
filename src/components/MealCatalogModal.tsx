@@ -82,7 +82,7 @@ export const MealCatalogModal: React.FC<MealCatalogModalProps> = ({
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-x-0 bottom-2 top-[max(env(safe-area-inset-top,20px),24px)] mx-auto w-[96vw] max-w-4xl max-h-[calc(100dvh-max(env(safe-area-inset-top,20px),24px)-16px)] bg-[#18181b] text-[#f4f4f5] border border-[#27272a] rounded-2xl shadow-2xl p-0 backdrop:bg-black/80 backdrop:backdrop-blur-md z-50 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+      className="app-modal backdrop:bg-black/80 backdrop:backdrop-blur-md animate-in fade-in zoom-in-95 duration-150"
     >
       {/* Compact Header - completely below top notch/status bar */}
       <div className="px-3 py-2 border-b border-[#27272a] bg-[#141417] flex items-center justify-between shrink-0">
@@ -238,7 +238,7 @@ export const MealCatalogModal: React.FC<MealCatalogModalProps> = ({
       </div>
 
       {/* Ultra-Dense Compact Dishes List - Fits 20+ meals on screen */}
-      <div className="flex-1 overflow-y-auto p-2 no-scrollbar">
+      <div className="flex-1 min-h-0 overflow-y-auto p-2 no-scrollbar">
         {filteredDishes.length === 0 ? (
           <div className="py-12 text-center text-zinc-500 text-xs flex flex-col items-center justify-center gap-1">
             <Filter className="w-6 h-6 opacity-40 text-zinc-400" />

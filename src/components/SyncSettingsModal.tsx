@@ -116,7 +116,7 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-x-0 bottom-2 top-[max(env(safe-area-inset-top,20px),24px)] mx-auto w-[96vw] max-w-xl max-h-[calc(100dvh-max(env(safe-area-inset-top,20px),24px)-16px)] bg-[#18181b] text-[#f4f4f5] border border-[#27272a] rounded-2xl shadow-2xl p-0 backdrop:bg-black/80 backdrop:backdrop-blur-md z-50 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+      className="app-modal-settings backdrop:bg-black/80 backdrop:backdrop-blur-md animate-in fade-in zoom-in-95 duration-150"
     >
       {/* Header - safe below notch */}
       <div className="px-4 sm:px-6 py-3.5 border-b border-[#27272a] bg-[#141417] flex items-center justify-between shrink-0">
@@ -139,7 +139,7 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-5">
         {/* Connection Status Banner */}
         <div className="p-3.5 sm:p-4 rounded-xl bg-[#121215] border border-[#27272a] flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3">

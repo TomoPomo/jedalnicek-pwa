@@ -82,3 +82,75 @@ dialog::backdrop {
   animation-play-state: paused;
 }
 
+/* Modal and Drawer positioning safe for all mobile notches, desktop & tablets */
+.app-modal {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  width: min(96vw, 56rem);
+  height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px);
+  height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px);
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #18181b;
+  color: #f4f4f5;
+  border: 1px solid #27272a;
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+  z-index: 50;
+  margin: 0;
+}
+
+.app-modal-settings {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  width: min(96vw, 38rem);
+  height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px);
+  height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px);
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #18181b;
+  color: #f4f4f5;
+  border: 1px solid #27272a;
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+  z-index: 50;
+  margin: 0;
+}
+
+.app-drawer {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  top: auto;
+  width: min(100vw, 42rem);
+  height: 84vh;
+  height: 84dvh;
+  max-height: calc(100vh - env(safe-area-inset-top, 0px) - 16px);
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 16px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #18181b;
+  color: #f4f4f5;
+  border-top: 1px solid #27272a;
+  border-left: 1px solid #27272a;
+  border-right: 1px solid #27272a;
+  border-top-left-radius: 1.5rem;
+  border-top-right-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+  z-index: 50;
+  margin: 0;
+}
+
+
