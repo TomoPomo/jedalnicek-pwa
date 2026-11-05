@@ -150,7 +150,7 @@ export const BottomSheetDrawer: React.FC<BottomSheetDrawerProps> = ({
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-x-0 bottom-0 top-auto m-0 w-full max-w-2xl mx-auto bg-[#18181b] text-[#f4f4f5] border-t border-x border-[#27272a] rounded-t-3xl shadow-2xl p-0 backdrop:bg-black/75 backdrop:backdrop-blur-sm z-50 overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[88vh] animate-in slide-in-from-bottom duration-200"
+      className="fixed inset-x-0 bottom-0 top-[max(env(safe-area-inset-top,20px),24px)] m-0 w-full max-w-2xl mx-auto bg-[#18181b] text-[#f4f4f5] border-t border-x border-[#27272a] rounded-t-3xl shadow-2xl p-0 backdrop:bg-black/75 backdrop:backdrop-blur-sm z-50 overflow-hidden flex flex-col max-h-[calc(100dvh-max(env(safe-area-inset-top,20px),24px))] animate-in slide-in-from-bottom duration-200"
     >
       {/* Handle pull bar */}
       <div className="pt-2 pb-1 flex justify-center cursor-pointer" onClick={onClose}>

@@ -116,109 +116,111 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-0 m-auto bg-[#18181b] text-[#f4f4f5] border border-[#27272a] rounded-2xl w-[94%] max-w-lg shadow-2xl p-0 backdrop:bg-black/75 backdrop:backdrop-blur-sm z-50 flex flex-col max-h-[88vh] animate-in fade-in zoom-in-95 duration-150"
+      className="fixed inset-x-0 bottom-2 top-[max(env(safe-area-inset-top,20px),24px)] mx-auto w-[96vw] max-w-xl max-h-[calc(100dvh-max(env(safe-area-inset-top,20px),24px)-16px)] bg-[#18181b] text-[#f4f4f5] border border-[#27272a] rounded-2xl shadow-2xl p-0 backdrop:bg-black/80 backdrop:backdrop-blur-md z-50 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
     >
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-[#27272a] flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Wifi className="w-5 h-5 text-emerald-400" />
+      {/* Header - safe below notch */}
+      <div className="px-4 sm:px-6 py-3.5 border-b border-[#27272a] bg-[#141417] flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <Wifi className="w-5 h-5" />
+          </div>
           <div>
-            <h2 className="text-base font-semibold text-white">Real-time synchronizácia</h2>
-            <p className="text-xs text-zinc-400">Nastavenie profilu a cloudovej databázy pre dvoch</p>
+            <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">Nastavenia & Synchronizácia</h2>
+            <p className="text-xs text-zinc-400">Prepojenie databázy a profil pre dvoch používateľov</p>
           </div>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+          className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
           aria-label="Zatvoriť"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-5">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
         {/* Connection Status Banner */}
-        <div className="p-3 rounded-xl bg-[#121212] border border-[#27272a] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="relative flex h-3 w-3">
+        <div className="p-3.5 sm:p-4 rounded-xl bg-[#121215] border border-[#27272a] flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="relative flex h-3.5 w-3.5">
               <span
                 className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
                   syncStatus === 'connected' || syncStatus === 'local' ? 'bg-emerald-400' : 'bg-amber-400'
                 }`}
               />
               <span
-                className={`relative inline-flex rounded-full h-3 w-3 ${
+                className={`relative inline-flex rounded-full h-3.5 w-3.5 ${
                   syncStatus === 'connected' || syncStatus === 'local' ? 'bg-emerald-500' : 'bg-amber-500'
                 }`}
               />
             </span>
             <div>
-              <div className="text-xs font-semibold text-zinc-200">
+              <div className="text-sm font-bold text-zinc-100">
                 {syncStatus === 'connected'
                   ? 'Pripojené k Supabase Cloud'
                   : syncStatus === 'local'
                   ? 'Lokálna synchronizácia (Multi-tab & Offline)'
                   : 'Pripája sa k serveru...'}
               </div>
-              <div className="text-[11px] text-zinc-400">
-                {activeUsers.length} aktívny{activeUsers.length === 1 ? '' : 'ch'} používateľ{activeUsers.length === 1 ? '' : 'ia'} v aplikácii
+              <div className="text-xs text-zinc-400 mt-0.5">
+                {activeUsers.length} aktívny{activeUsers.length === 1 ? '' : 'ch'} používateľ{activeUsers.length === 1 ? '' : 'ia'} online
               </div>
             </div>
           </div>
 
-          <div className="flex items-center -space-x-1.5">
+          <div className="flex items-center -space-x-2">
             {activeUsers.map((u) => (
               <div
                 key={u.id}
                 style={{ backgroundColor: u.color }}
-                className="w-6 h-6 rounded-full border-2 border-[#18181b] flex items-center justify-center text-[10px] font-bold text-white shadow-sm"
+                className="w-8 h-8 rounded-full border-2 border-[#18181b] flex items-center justify-center text-xs font-bold text-white shadow-md"
                 title={`${u.name} (online)`}
               >
-                {u.name.substring(0, 1).toUpperCase()}
+                {u.name ? u.name.charAt(0).toUpperCase() : '?'}
               </div>
             ))}
           </div>
         </div>
 
         {/* User Profile Form */}
-        <form onSubmit={handleSaveProfile} className="space-y-3 p-3.5 bg-[#141417] border border-[#27272a] rounded-xl">
-          <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
+        <form onSubmit={handleSaveProfile} className="space-y-4 p-4 bg-[#141417] border border-[#27272a] rounded-xl shadow-sm">
+          <div className="flex items-center gap-2 text-sm font-bold text-zinc-200">
             <Users className="w-4 h-4 text-blue-400" />
             <span>Môj profil v aplikácii</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3.5">
             <div
               style={{ backgroundColor: userColor }}
-              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-inner shrink-0"
+              className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-inner shrink-0"
             >
               {userName ? userName.charAt(0).toUpperCase() : '?'}
             </div>
 
             <div className="flex-1">
-              <label className="block text-[11px] text-zinc-400 mb-1">Meno / Prezývka</label>
+              <label className="block text-xs font-medium text-zinc-300 mb-1">Meno / Prezývka</label>
               <input
                 type="text"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
                 placeholder="napr. Tomo alebo Zuzka"
-                className="w-full bg-[#18181b] border border-[#27272a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
+                className="w-full bg-[#18181b] border border-zinc-700 rounded-xl px-3.5 py-2 text-sm text-zinc-100 focus:outline-none focus:border-blue-500 shadow-inner"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] text-zinc-400 mb-1">Farba avatara</label>
-            <div className="flex items-center gap-2">
+            <label className="block text-xs font-medium text-zinc-300 mb-1.5">Farba avatara</label>
+            <div className="flex items-center gap-2.5">
               {colorPresets.map((preset) => (
                 <button
                   key={preset.val}
                   type="button"
                   onClick={() => setUserColor(preset.val)}
                   style={{ backgroundColor: preset.val }}
-                  className={`w-6 h-6 rounded-full transition-transform ${
-                    userColor === preset.val ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100'
+                  className={`w-7 h-7 rounded-full transition-transform ${
+                    userColor === preset.val ? 'ring-2 ring-white scale-110 shadow-md' : 'opacity-70 hover:opacity-100'
                   }`}
                   title={preset.label}
                 />
@@ -228,59 +230,59 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
 
           <button
             type="submit"
-            className="w-full py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold rounded-lg transition-colors"
+            className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-bold rounded-xl transition-colors shadow-sm"
           >
             Uložiť profil
           </button>
         </form>
 
         {/* Supabase Configuration */}
-        <form onSubmit={handleSaveSupabase} className="space-y-3 p-3.5 bg-[#141417] border border-[#27272a] rounded-xl">
+        <form onSubmit={handleSaveSupabase} className="space-y-4 p-4 bg-[#141417] border border-[#27272a] rounded-xl shadow-sm">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-semibold text-zinc-200">
+            <div className="flex items-center gap-2 text-sm font-bold text-zinc-200">
               <Database className="w-4 h-4 text-emerald-400" />
               <span>Supabase Cloud (pre 2 telefóny)</span>
             </div>
             {supabaseUrl && (
-              <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
-                <ShieldCheck className="w-3 h-3" /> Nastavené
+              <span className="text-xs text-emerald-400 flex items-center gap-1 font-mono font-semibold">
+                <ShieldCheck className="w-3.5 h-3.5" /> Nastavené
               </span>
             )}
           </div>
 
-          <p className="text-[11px] text-zinc-400 leading-relaxed">
-            Pre okamžité prepojenie dvoch rôznych telefónov zadaj svoje bezplatné prihlasovacie údaje zo Supabase.
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Sem vložte údaje z vášho projektu na Supabase (Settings → API):
           </p>
 
           <div>
-            <label className="block text-[11px] text-zinc-400 mb-1">Project URL</label>
+            <label className="block text-xs font-medium text-zinc-300 mb-1">Project URL</label>
             <input
               type="url"
               value={supabaseUrl}
               onChange={(e) => setSupabaseUrl(e.target.value)}
               placeholder="https://xyzcompany.supabase.co"
-              className="w-full bg-[#18181b] border border-[#27272a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 font-mono placeholder-zinc-600 focus:outline-none focus:border-emerald-500"
+              className="w-full bg-[#18181b] border border-zinc-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-zinc-100 font-mono placeholder-zinc-600 focus:outline-none focus:border-emerald-500 shadow-inner"
             />
           </div>
 
           <div>
-            <label className="block text-[11px] text-zinc-400 mb-1">Anon / Public API Key</label>
+            <label className="block text-xs font-medium text-zinc-300 mb-1">Anon / Public API Key</label>
             <input
               type="password"
               value={supabaseAnonKey}
               onChange={(e) => setSupabaseAnonKey(e.target.value)}
               placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..."
-              className="w-full bg-[#18181b] border border-[#27272a] rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 font-mono placeholder-zinc-600 focus:outline-none focus:border-emerald-500"
+              className="w-full bg-[#18181b] border border-zinc-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-zinc-100 font-mono placeholder-zinc-600 focus:outline-none focus:border-emerald-500 shadow-inner"
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2.5">
             <button
               type="submit"
               disabled={!supabaseUrl.trim() || !supabaseAnonKey.trim()}
-              className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5"
+              className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs sm:text-sm font-bold rounded-xl transition-colors flex items-center justify-center gap-1.5 shadow-md"
             >
-              <Check className="w-3.5 h-3.5" />
+              <Check className="w-4 h-4" />
               <span>Uložiť & Prepojiť</span>
             </button>
 
@@ -288,7 +290,7 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
               <button
                 type="button"
                 onClick={handleClearSupabase}
-                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-lg"
+                className="px-3.5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-xl"
               >
                 Odpojiť
               </button>
@@ -297,48 +299,48 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
         </form>
 
         {/* Supabase SQL Instructions */}
-        <div className="p-3.5 bg-[#121212] border border-[#27272a] rounded-xl space-y-2">
+        <div className="p-4 bg-[#121215] border border-[#27272a] rounded-xl space-y-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-zinc-300">SQL príkaz pre Supabase (1 klik):</span>
+            <span className="text-xs font-bold text-zinc-300">SQL príkaz pre Supabase:</span>
             <button
               type="button"
               onClick={handleCopySql}
-              className="flex items-center gap-1 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded text-[11px] font-medium transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs font-semibold transition-colors"
             >
               {copiedSql ? (
                 <>
-                  <Check className="w-3 h-3 text-emerald-400" />
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
                   <span className="text-emerald-400">Skopírované!</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-3 h-3" />
+                  <Copy className="w-3.5 h-3.5" />
                   <span>Kopírovať SQL</span>
                 </>
               )}
             </button>
           </div>
-          <p className="text-[11px] text-zinc-400 leading-relaxed">
-            V Supabase prejdite do <strong>SQL Editor</strong>, vložte tento kód a stlačte <strong>RUN</strong>. Vytvorí potrebné tabuľky a zapne Realtime.
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            V Supabase prejdite do <strong>SQL Editor</strong>, vložte kód a kliknite na <strong>RUN</strong>.
           </p>
-          <pre className="bg-[#18181b] p-2 rounded-lg text-[10px] text-zinc-400 font-mono overflow-x-auto max-h-24 no-scrollbar border border-zinc-800">
+          <pre className="bg-[#18181b] p-2.5 rounded-lg text-[10px] text-zinc-400 font-mono overflow-x-auto max-h-24 no-scrollbar border border-zinc-800">
             {SUPABASE_SQL_SCHEMA}
           </pre>
         </div>
 
         {saveSuccess && (
-          <div className="p-2.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs text-center font-medium">
+          <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold text-center">
             Nastavenia boli úspešne uložené!
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-2.5 border-t border-[#27272a] bg-[#141417] flex justify-end">
+      <div className="px-4 sm:px-6 py-3 border-t border-[#27272a] bg-[#141417] flex justify-end shrink-0">
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold rounded-lg transition-colors"
+          className="px-5 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs sm:text-sm font-bold rounded-xl transition-colors shadow-sm"
         >
           Zatvoriť
         </button>
