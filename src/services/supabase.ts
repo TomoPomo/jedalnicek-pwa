@@ -35,6 +35,40 @@ export function saveStoredSupabaseConfig(config: SupabaseConfig): void {
   }
 }
 
+/**
+ * Checks if the page was opened with a #connect= base64 payload from partner QR code/link.
+ * If yes, saves config to localStorage and removes hash from URL.
+ */
+export function checkAndApplyUrlHashConfig(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#connect=')) {
+      const payload = hash.replace('#connect=', '');
+      const decoded = JSON.parse(atob(payload));
+      if (decoded.url && decoded.key) {
+        saveStoredSupabaseConfig({ url: decoded.url, anonKey: decoded.key });
+        window.history.replaceState(null, '', window.location.pathname);
+        return true;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to parse connection hash from URL:', e);
+  }
+  return false;
+}
+
+/**
+ * Generates a direct connection link for partner
+ */
+export function generateConnectionLink(overrideConfig?: SupabaseConfig): string {
+  if (typeof window === 'undefined') return '';
+  const config = overrideConfig || getStoredSupabaseConfig();
+  if (!config.url || !config.anonKey) return '';
+  const payload = btoa(JSON.stringify({ url: config.url, key: config.anonKey }));
+  return `${window.location.origin}${window.location.pathname}#connect=${payload}`;
+}
+
 let supabaseInstance: SupabaseClient | null = null;
 let currentConfig: SupabaseConfig = { url: '', anonKey: '' };
 

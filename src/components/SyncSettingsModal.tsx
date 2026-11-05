@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Check, Copy, Wifi, Users, Database, ShieldCheck } from 'lucide-react';
+import { X, Check, Copy, Wifi, Users, Database, ShieldCheck, QrCode, Share2 } from 'lucide-react';
+import QRCode from 'qrcode';
 import { UserProfile, SupabaseConfig } from '../types';
 import {
   getStoredSupabaseConfig,
   saveStoredSupabaseConfig,
+  generateConnectionLink,
   SUPABASE_SQL_SCHEMA,
 } from '../services/supabase';
 import { syncManager, SyncStatus, PresenceUser } from '../services/syncManager';
@@ -26,12 +28,15 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
   onClose,
 }) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const qrCanvasRef = useRef<HTMLCanvasElement>(null);
+
   const [userName, setUserName] = useState(currentUser.name);
   const [userColor, setUserColor] = useState(currentUser.color);
 
   const [supabaseUrl, setSupabaseUrl] = useState('');
   const [supabaseAnonKey, setSupabaseAnonKey] = useState('');
   const [copiedSql, setCopiedSql] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
@@ -41,6 +46,23 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
     setUserName(currentUser.name);
     setUserColor(currentUser.color);
   }, [isOpen, currentUser]);
+
+  // Render QR code whenever modal opens with valid config
+  useEffect(() => {
+    if (isOpen && supabaseUrl && supabaseAnonKey && qrCanvasRef.current) {
+      const link = generateConnectionLink({ url: supabaseUrl, anonKey: supabaseAnonKey });
+      if (link) {
+        QRCode.toCanvas(qrCanvasRef.current, link, {
+          width: 160,
+          margin: 1,
+          color: {
+            dark: '#000000',
+            light: '#ffffff',
+          },
+        }).catch((err) => console.error('QR code generation error:', err));
+      }
+    }
+  }, [isOpen, supabaseUrl, supabaseAnonKey]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -98,6 +120,32 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
     syncManager.initSupabaseSync();
   };
 
+  const handleCopyLink = () => {
+    const link = generateConnectionLink({ url: supabaseUrl, anonKey: supabaseAnonKey });
+    if (link) {
+      navigator.clipboard.writeText(link);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    }
+  };
+
+  const handleNativeShare = async () => {
+    const link = generateConnectionLink({ url: supabaseUrl, anonKey: supabaseAnonKey });
+    if (link && navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Jedálniček prepojenie',
+          text: 'Pripoj sa k nášmu spoločnému jedálničku pre dvoch:',
+          url: link,
+        });
+      } catch (e) {
+        // user cancelled
+      }
+    } else {
+      handleCopyLink();
+    }
+  };
+
   const handleCopySql = () => {
     navigator.clipboard.writeText(SUPABASE_SQL_SCHEMA);
     setCopiedSql(true);
@@ -126,7 +174,7 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">Nastavenia & Synchronizácia</h2>
-            <p className="text-xs text-zinc-400">Prepojenie databázy a profil pre dvoch používateľov</p>
+            <p className="text-xs text-zinc-400">Súkromná databáza pre dvoch používateľov</p>
           </div>
         </div>
         <button
@@ -158,9 +206,9 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
             <div>
               <div className="text-sm font-bold text-zinc-100">
                 {syncStatus === 'connected'
-                  ? 'Pripojené k Supabase Cloud'
+                  ? 'Pripojené k vašej Supabase Cloud DB'
                   : syncStatus === 'local'
-                  ? 'Lokálna synchronizácia (Multi-tab & Offline)'
+                  ? 'Lokálny režim (Zatiaľ bez Supabase)'
                   : 'Pripája sa k serveru...'}
               </div>
               <div className="text-xs text-zinc-400 mt-0.5">
@@ -182,6 +230,75 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
             ))}
           </div>
         </div>
+
+        {/* 🔒 Súkromie info box (Option 4) */}
+        <div className="p-3.5 bg-[#121215] border border-blue-500/30 rounded-xl text-xs text-zinc-300 leading-relaxed flex items-start gap-2.5">
+          <ShieldCheck className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+          <div>
+            <strong className="text-white block mb-0.5">Súkromná databáza pre váš pár:</strong>
+            Verejná webová adresa na Netlify neobsahuje žiadne databázové kľúče. Cudzí návštevníci vidia iba demo. K vašim jedlám máte prístup výhradne vy a partnerka cez tento QR kód alebo zadané údaje.
+          </div>
+        </div>
+
+        {/* 📱 Partner Quick Connect via QR code or Link */}
+        {supabaseUrl && supabaseAnonKey && (
+          <div className="p-4 bg-gradient-to-br from-[#161d2b] to-[#141417] border border-blue-500/40 rounded-xl space-y-3.5 shadow-md">
+            <div className="flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-blue-400" />
+              <div>
+                <h3 className="text-sm font-bold text-white">Prepojenie s partnerom (1 klik / QR kód)</h3>
+                <p className="text-xs text-zinc-300">
+                  Partnerka nemusí nič opisovať ani manuálne konfigurovať.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-4 bg-[#0d0d11] p-3 rounded-xl border border-zinc-800">
+              {/* High-contrast QR canvas */}
+              <div className="p-2 bg-white rounded-xl shadow-lg shrink-0">
+                <canvas ref={qrCanvasRef} className="w-36 h-36 block" />
+              </div>
+
+              <div className="flex-1 space-y-2.5 text-center sm:text-left">
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  <strong>1. Fotoaparát:</strong> Partnerka namieri fotoaparát svojho mobilu na tento QR kód a ťukne na odkaz.<br />
+                  <strong>2. Alebo odkaz:</strong> Pošlite jej odkaz priamo na WhatsApp alebo SMS:
+                </p>
+
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start pt-1">
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
+                  >
+                    {copiedLink ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-white" />
+                        <span>Odkaz skopírovaný!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Kopírovať odkaz pre partnerku</span>
+                      </>
+                    )}
+                  </button>
+
+                  {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
+                    <button
+                      type="button"
+                      onClick={handleNativeShare}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs font-semibold border border-zinc-700 transition-colors"
+                    >
+                      <Share2 className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Zdieľať (WhatsApp/SMS)</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* User Profile Form */}
         <form onSubmit={handleSaveProfile} className="space-y-4 p-4 bg-[#141417] border border-[#27272a] rounded-xl shadow-sm">
@@ -236,7 +353,7 @@ export const SyncSettingsModal: React.FC<SyncSettingsModalProps> = ({
           </button>
         </form>
 
-        {/* Supabase Configuration */}
+        {/* Supabase Configuration Form */}
         <form onSubmit={handleSaveSupabase} className="space-y-4 p-4 bg-[#141417] border border-[#27272a] rounded-xl shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm font-bold text-zinc-200">

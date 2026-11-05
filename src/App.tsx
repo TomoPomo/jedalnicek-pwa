@@ -16,6 +16,7 @@ import {
 } from './services/syncManager';
 import { DayKey, MealType, UserProfile } from './types';
 import { getISOWeekInfo, shiftWeekId, formatWeekRange } from './utils/dateUtils';
+import { checkAndApplyUrlHashConfig } from './services/supabase';
 
 export function App() {
   const [currentWeekId, setCurrentWeekId] = useState<string>(() => getISOWeekInfo().weekId);
@@ -49,6 +50,14 @@ export function App() {
       setToastMessage((prev) => (prev === msg ? null : prev));
     }, 2800);
   }, []);
+
+  // Check if opened via QR code or partner connect link
+  useEffect(() => {
+    if (checkAndApplyUrlHashConfig()) {
+      syncManager.initSupabaseSync();
+      showToast('🎉 Zariadenie bolo úspešne prepojené s databázou!');
+    }
+  }, [showToast]);
 
   // Sync manager subscriptions
   useEffect(() => {
