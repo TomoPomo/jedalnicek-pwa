@@ -24,28 +24,28 @@ export const DayCard: React.FC<DayCardProps> = ({
     <div
       className={`rounded-xl border transition-all duration-150 flex flex-col justify-between p-1.5 sm:p-2 ${
         isToday
-          ? 'bg-[#1a1c23] border-blue-500/40 ring-1 ring-blue-500/30'
+          ? 'bg-blue-50/70 dark:bg-[#1a1c23] border-blue-400 dark:border-blue-500/40 ring-1 ring-blue-500/30'
           : isWeekend
-          ? 'bg-[#161619] border-[#27272a]/80'
-          : 'bg-[#18181b] border-[#27272a]'
+          ? 'bg-slate-50 dark:bg-[#161619] border-slate-200 dark:border-[#27272a]/80'
+          : 'bg-white dark:bg-[#18181b] border-slate-200 dark:border-[#27272a] shadow-xs'
       }`}
     >
       {/* Day Header Row */}
-      <div className="flex items-center justify-between pb-1 mb-0.5 border-b border-[#27272a]/60">
+      <div className="flex items-center justify-between pb-1 mb-0.5 border-b border-slate-200 dark:border-[#27272a]/60">
         <div className="flex items-center gap-1.5">
           <span
             className={`text-xs font-bold tracking-tight ${
-              isToday ? 'text-blue-400' : isWeekend ? 'text-zinc-400' : 'text-zinc-200'
+              isToday ? 'text-blue-600 dark:text-blue-400' : isWeekend ? 'text-slate-500 dark:text-zinc-400' : 'text-slate-800 dark:text-zinc-200'
             }`}
           >
             {shortLabel}
           </span>
-          <span className="text-[10px] text-zinc-400 font-mono hidden xs:inline">{fullLabel}</span>
-          <span className="text-[10px] text-zinc-500 font-mono">({dateStr})</span>
+          <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-mono hidden xs:inline">{fullLabel}</span>
+          <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">({dateStr})</span>
         </div>
 
         {isToday && (
-          <span className="px-1.5 py-0.2 rounded-full text-[9px] font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+          <span className="px-1.5 py-0.2 rounded-full text-[9px] font-semibold bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30">
             Dnes
           </span>
         )}

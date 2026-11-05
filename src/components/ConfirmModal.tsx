@@ -55,7 +55,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-0 m-auto bg-[#18181b] text-[#f4f4f5] border border-[#27272a] rounded-2xl p-5 max-w-sm w-[90%] shadow-2xl backdrop:bg-black/75 backdrop:backdrop-blur-sm z-50 animate-in fade-in zoom-in-95 duration-150"
+      className="fixed inset-0 m-auto bg-white dark:bg-[#18181b] text-slate-900 dark:text-[#f4f4f5] border border-slate-200 dark:border-[#27272a] rounded-2xl p-5 max-w-sm w-[90%] shadow-2xl backdrop:bg-black/60 dark:backdrop:bg-black/75 backdrop:backdrop-blur-sm z-50 animate-in fade-in zoom-in-95 duration-150"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
@@ -64,25 +64,25 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
               <AlertTriangle className="w-4 h-4" />
             </div>
           )}
-          <h2 className="text-base font-semibold text-white">{title}</h2>
+          <h2 className="text-base font-semibold text-slate-900 dark:text-white">{title}</h2>
         </div>
         <button
           type="button"
           onClick={onCancel}
-          className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+          className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800 transition-colors"
           aria-label="Zavrieť"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
 
-      <p className="text-sm text-zinc-300 mb-5 leading-relaxed">{message}</p>
+      <p className="text-sm text-slate-600 dark:text-zinc-300 mb-5 leading-relaxed">{message}</p>
 
       <div className="flex items-center justify-end gap-2">
         <button
           type="button"
           onClick={onCancel}
-          className="px-3 py-1.5 text-xs font-medium rounded-lg text-zinc-300 hover:bg-zinc-800 transition-colors"
+          className="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
         >
           Zrušiť
         </button>

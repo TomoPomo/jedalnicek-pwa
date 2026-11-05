@@ -129,7 +129,7 @@ export const MealSlot: React.FC<MealSlotProps> = ({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder={`Zadaj ${config.label.toLowerCase()}...`}
-            className="w-full bg-[#121212] border border-blue-500/70 rounded px-1.5 py-0.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-white dark:bg-[#121212] border border-blue-500 rounded px-2 py-0.5 text-xs text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-inner"
           />
 
           {inputValue && (
@@ -140,7 +140,7 @@ export const MealSlot: React.FC<MealSlotProps> = ({
                 onChange('', true);
                 inputRef.current?.focus();
               }}
-              className="text-zinc-500 hover:text-white p-0.5"
+              className="text-slate-400 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-white p-0.5"
             >
               <X className="w-3 h-3" />
             </button>
@@ -152,7 +152,7 @@ export const MealSlot: React.FC<MealSlotProps> = ({
               setIsEditing(false);
               setShowSuggestions(false);
             }}
-            className="text-emerald-400 hover:text-emerald-300 p-0.5"
+            className="text-emerald-600 dark:text-emerald-400 hover:opacity-80 p-0.5"
           >
             <Check className="w-3.5 h-3.5" />
           </button>
@@ -162,13 +162,13 @@ export const MealSlot: React.FC<MealSlotProps> = ({
           {/* Clickable text area triggers inline edit */}
           <div
             onClick={() => setIsEditing(true)}
-            className="flex-1 min-w-0 text-xs cursor-text py-0.5 px-1 rounded hover:bg-zinc-800/60 transition-colors"
+            className="flex-1 min-w-0 text-xs cursor-text py-0.5 px-1 rounded hover:bg-slate-200/60 dark:hover:bg-zinc-800/60 transition-colors"
             title="Klikni pre písanie textu"
           >
             {value ? (
-              <MarqueeText text={value} className="text-zinc-200 font-normal leading-tight" />
+              <MarqueeText text={value} className="text-slate-800 dark:text-zinc-200 font-medium leading-tight" />
             ) : (
-              <span className="text-zinc-600 text-[11px] italic">voľné...</span>
+              <span className="text-slate-400 dark:text-zinc-600 text-[11px] italic">voľné...</span>
             )}
           </div>
 
@@ -178,7 +178,7 @@ export const MealSlot: React.FC<MealSlotProps> = ({
               type="button"
               onClick={onOpenBottomSheet}
               title="Vybrať z knižnice / vyskladať"
-              className="p-1 rounded text-zinc-400 hover:text-blue-400 hover:bg-zinc-800 transition-colors"
+              className="p-1 rounded text-slate-400 hover:text-blue-500 hover:bg-slate-200 dark:text-zinc-400 dark:hover:text-blue-400 dark:hover:bg-zinc-800 transition-colors"
             >
               <BookOpen className="w-3 h-3" />
             </button>
@@ -188,8 +188,8 @@ export const MealSlot: React.FC<MealSlotProps> = ({
 
       {/* Typeahead Autocomplete Popover */}
       {isEditing && showSuggestions && suggestions.length > 0 && (
-        <div className="absolute left-6 top-full mt-0.5 w-64 bg-[#1e1e24] border border-[#27272a] rounded-lg shadow-xl py-1 z-30 animate-in fade-in zoom-in-95 duration-100">
-          <div className="px-2 py-0.5 text-[9px] font-semibold text-zinc-400 uppercase tracking-wider border-b border-[#27272a]">
+        <div className="absolute left-6 top-full mt-0.5 w-64 bg-white dark:bg-[#1e1e24] border border-slate-200 dark:border-[#27272a] rounded-lg shadow-xl py-1 z-30 animate-in fade-in zoom-in-95 duration-100">
+          <div className="px-2 py-0.5 text-[9px] font-semibold text-slate-400 dark:text-zinc-400 uppercase tracking-wider border-b border-slate-100 dark:border-[#27272a]">
             Našepkávač z knižnice
           </div>
           {suggestions.map((sug) => (
@@ -199,10 +199,10 @@ export const MealSlot: React.FC<MealSlotProps> = ({
                 e.preventDefault(); // Prevent input blur
                 handleSelectSuggestion(sug.name);
               }}
-              className="px-2 py-1.5 text-xs text-zinc-200 hover:bg-blue-600/20 hover:text-blue-300 cursor-pointer flex items-center justify-between transition-colors"
+              className="px-2 py-1.5 text-xs text-slate-700 dark:text-zinc-200 hover:bg-blue-50 dark:hover:bg-blue-600/20 hover:text-blue-600 dark:hover:text-blue-300 cursor-pointer flex items-center justify-between transition-colors"
             >
               <span className="truncate">{sug.name}</span>
-              <span className="text-[10px] text-zinc-500 ml-2 capitalize shrink-0">{sug.category}</span>
+              <span className="text-[10px] text-slate-400 dark:text-zinc-500 ml-2 capitalize shrink-0">{sug.category}</span>
             </div>
           ))}
         </div>

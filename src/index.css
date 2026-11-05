@@ -153,4 +153,20 @@ dialog::backdrop {
   margin: 0;
 }
 
+/* Light mode overrides for modal and drawers */
+.light .app-modal,
+.light .app-modal-settings,
+.light .app-drawer {
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #e2e8f0;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.2);
+}
+
+.light dialog::backdrop {
+  background-color: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+
 
