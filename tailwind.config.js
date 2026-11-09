@@ -40,9 +40,9 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        serif: ['"Playfair Display"', '"Cormorant Garamond"', 'Georgia', 'serif'],
-        bistro: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+        sans: ['"Outfit"', '"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['"Space Grotesk"', 'monospace'],
+        modern: ['"Space Grotesk"', '"Outfit"', 'sans-serif'],
       },
     },
   },
