@@ -8,6 +8,7 @@ import {
   Settings,
   Sun,
   Moon,
+  Utensils,
 } from 'lucide-react';
 import { SyncStatus, PresenceUser } from '../services/syncManager';
 import { formatWeekRange, getISOWeekInfo, shiftWeekId } from '../utils/dateUtils';
@@ -21,6 +22,7 @@ interface HeaderProps {
   theme: Theme;
   onToggleTheme: () => void;
   onChangeWeek: (weekId: string) => void;
+  onBackToMenu: () => void;
   onOpenCatalog: () => void;
   onOpenSettings: () => void;
   onRequestCopyWeek: () => void;
@@ -35,6 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
   theme,
   onToggleTheme,
   onChangeWeek,
+  onBackToMenu,
   onOpenCatalog,
   onOpenSettings,
   onRequestCopyWeek,
@@ -73,6 +76,17 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Live Sync Status & Active Users & Quick Buttons */}
         <div className="flex items-center gap-2">
+          {/* Back to Restaurant Menu Board */}
+          <button
+            type="button"
+            onClick={onBackToMenu}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 border border-amber-500/30 text-xs font-semibold shadow-xs transition-all active:scale-95"
+            title="Prejsť na zobrazenie týždenného menu"
+          >
+            <Utensils className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <span>Zobraziť menu</span>
+          </button>
+
           {/* Live Sync Badge */}
           <button
             type="button"
