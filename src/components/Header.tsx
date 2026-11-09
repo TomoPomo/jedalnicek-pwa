@@ -6,21 +6,16 @@ import {
   Trash2,
   BookOpen,
   Settings,
-  Sun,
-  Moon,
   Utensils,
 } from 'lucide-react';
 import { SyncStatus, PresenceUser } from '../services/syncManager';
 import { formatWeekRange, getISOWeekInfo, shiftWeekId } from '../utils/dateUtils';
-import { Theme } from '../utils/theme';
 
 interface HeaderProps {
   currentWeekId: string;
   isSaving: boolean;
   syncStatus: SyncStatus;
   activeUsers: PresenceUser[];
-  theme: Theme;
-  onToggleTheme: () => void;
   onChangeWeek: (weekId: string) => void;
   onBackToMenu: () => void;
   onOpenCatalog: () => void;
@@ -34,8 +29,6 @@ export const Header: React.FC<HeaderProps> = ({
   isSaving,
   syncStatus,
   activeUsers,
-  theme,
-  onToggleTheme,
   onChangeWeek,
   onBackToMenu,
   onOpenCatalog,
@@ -123,21 +116,6 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
               ))}
             </div>
-          </button>
-
-          {/* Theme Switcher Toggle (Light / Dark) */}
-          <button
-            type="button"
-            onClick={onToggleTheme}
-            className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800 transition-colors border border-slate-200 dark:border-transparent"
-            title={theme === 'dark' ? 'Prepnúť na svetlý režim' : 'Prepnúť na tmavý režim'}
-            aria-label="Prepnúť svetlý/tmavý režim"
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-4 h-4 text-amber-400" />
-            ) : (
-              <Moon className="w-4 h-4 text-slate-700" />
-            )}
           </button>
 
           {/* Catalog Button */}

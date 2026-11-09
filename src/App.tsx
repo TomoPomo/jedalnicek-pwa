@@ -18,26 +18,19 @@ import {
 import { DayKey, MealType, UserProfile } from './types';
 import { getISOWeekInfo, shiftWeekId, formatWeekRange } from './utils/dateUtils';
 import { checkAndApplyUrlHashConfig } from './services/supabase';
-import { Theme, getInitialTheme, applyTheme } from './utils/theme';
+import { applyTheme } from './utils/theme';
 
 export function App() {
   const [activeView, setActiveView] = useState<'menu' | 'editor'>('menu');
-  const [theme, setTheme] = useState<Theme>(() => getInitialTheme());
   const [currentWeekId, setCurrentWeekId] = useState<string>(() => getISOWeekInfo().weekId);
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => getCurrentUser());
   const [activeUsers, setActiveUsers] = useState<PresenceUser[]>([]);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('connecting');
 
-  // Apply theme on load and sync
+  // Enforce light theme
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
-  const handleToggleTheme = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-    applyTheme(next);
-  };
+    applyTheme();
+  }, []);
 
   // Meal plan hook for active week
   const { plan, isSaving, updateMeal, copyToWeek, clearWeek } = useMealPlan(currentWeekId);
@@ -140,7 +133,7 @@ export function App() {
     bottomSheetDay && bottomSheetMeal ? plan.days[bottomSheetDay]?.[bottomSheetMeal] || '' : '';
 
   return (
-    <div className="h-full w-full flex flex-col bg-slate-100 dark:bg-[#121212] text-slate-900 dark:text-[#f4f4f5] select-none transition-colors">
+    <div className="h-full w-full flex flex-col bg-slate-50 text-slate-900 select-none transition-colors">
       {activeView === 'menu' ? (
         /* 🍽️ Initial Screen: Elegant Light Beige Restaurant Menu Board */
         <RestaurantMenuBoard
@@ -162,8 +155,6 @@ export function App() {
             isSaving={isSaving}
             syncStatus={syncStatus}
             activeUsers={activeUsers}
-            theme={theme}
-            onToggleTheme={handleToggleTheme}
             onChangeWeek={setCurrentWeekId}
             onBackToMenu={() => setActiveView('menu')}
             onOpenCatalog={() => setIsCatalogOpen(true)}
