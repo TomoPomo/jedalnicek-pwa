@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -6,11 +6,14 @@ import {
   BookOpen,
   Settings,
   Calendar,
+  Lock,
+  Unlock,
 } from 'lucide-react';
-import { WeekPlan, DayKey, MealType } from '../types';
+import { WeekPlan, DayKey, MealType, Dish } from '../types';
 import { getDaysForWeek, formatWeekRange, getISOWeekInfo, shiftWeekId } from '../utils/dateUtils';
 import { SyncStatus, PresenceUser } from '../services/syncManager';
 import { MarqueeText } from './MarqueeText';
+import { EditDayModal } from './EditDayModal';
 
 interface RestaurantMenuBoardProps {
   plan: WeekPlan;
@@ -22,6 +25,9 @@ interface RestaurantMenuBoardProps {
   onOpenEditor: (day?: DayKey, meal?: MealType) => void;
   onOpenCatalog: () => void;
   onOpenSettings: () => void;
+  onUpdateMeal: (day: DayKey, mealType: MealType, text: string, immediate?: boolean) => void;
+  onOpenBottomSheet: (day: DayKey, mealType: MealType) => void;
+  getSuggestions: (query: string, limit?: number) => Dish[];
 }
 
 export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
@@ -34,11 +40,43 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
   onOpenEditor,
   onOpenCatalog,
   onOpenSettings,
+  onUpdateMeal,
+  onOpenBottomSheet,
+  getSuggestions,
 }) => {
   const { weekNumber, rangeStr } = formatWeekRange(currentWeekId);
   const thisWeekId = getISOWeekInfo(new Date()).weekId;
   const isThisWeek = currentWeekId === thisWeekId;
   const daysInfo = getDaysForWeek(currentWeekId);
+
+  // Lock button state: remembers whether editing from the menu board is unlocked
+  const [isLocked, setIsLocked] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem('jedalnicek_menu_locked');
+      return stored !== null ? stored === 'true' : false; // Default to unlocked for immediate convenience
+    } catch {
+      return false;
+    }
+  });
+
+  const handleToggleLock = () => {
+    const next = !isLocked;
+    setIsLocked(next);
+    try {
+      localStorage.setItem('jedalnicek_menu_locked', String(next));
+    } catch (e) {
+      console.warn(e);
+    }
+  };
+
+  // Specific Day Edit Modal state
+  const [selectedDayForEdit, setSelectedDayForEdit] = useState<DayKey | null>(null);
+
+  const handleDayClick = (dayKey: DayKey) => {
+    if (!isLocked) {
+      setSelectedDayForEdit(dayKey);
+    }
+  };
 
   return (
     <div className="h-full w-full flex flex-col bg-[#f5efe4] text-[#241a12] overflow-hidden select-none font-sans">
@@ -93,12 +131,35 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
         </div>
 
         {/* Right: Icon-only Action Buttons */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          {/* 🔒 LOCK / UNLOCK BUTTON */}
+          <button
+            type="button"
+            onClick={handleToggleLock}
+            className={`flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg border transition-all active:scale-95 shadow-2xs ${
+              isLocked
+                ? 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300'
+                : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border-emerald-300'
+            }`}
+            title={
+              isLocked
+                ? 'Úpravy dňa sú zamknuté (kliknite pre odomknutie)'
+                : 'Úpravy dňa sú odomknuté (kliknutím na deň môžete editovať)'
+            }
+            aria-label={isLocked ? 'Odomknúť úpravy' : 'Zamknúť úpravy'}
+          >
+            {isLocked ? (
+              <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-800" />
+            ) : (
+              <Unlock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-800" />
+            )}
+          </button>
+
           {/* Sync indicator */}
           <button
             type="button"
             onClick={onOpenSettings}
-            className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#eae0cb] hover:bg-[#ded1b6] border border-[#d5c5a7] text-[#57422f] transition-colors relative"
+            className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#eae0cb] hover:bg-[#ded1b6] border border-[#d5c5a7] text-[#57422f] transition-colors relative"
             title={`Synchronizácia: ${syncStatus} | Aktívni používatelia: ${activeUsers.length}`}
             aria-label="Stav synchronizácie"
           >
@@ -122,7 +183,7 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
             title="Knižnica receptov"
             aria-label="Knižnica receptov"
           >
-            <BookOpen className="w-4 h-4 text-[#8f6230]" />
+            <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8f6230]" />
           </button>
 
           {/* Settings Button (Icon only) */}
@@ -133,18 +194,18 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
             title="Nastavenia"
             aria-label="Nastavenia"
           >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
 
-          {/* ✏️ MAIN EDIT BUTTON (Clean icon button, prominent & sleek) */}
+          {/* ✏️ MAIN EDIT BUTTON (Switches to full planner) */}
           <button
             type="button"
             onClick={() => onOpenEditor()}
             className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#2e1f13] hover:bg-[#1a110a] text-[#fbf6ee] shadow-sm active:scale-95 transition-all border border-[#20150d]"
-            title="Editovať plán jedálnička"
-            aria-label="Editovať plán"
+            title="Prepnúť do plánovača jedálnička"
+            aria-label="Plánovač"
           >
-            <Edit3 className="w-4 h-4 text-[#e8c894]" />
+            <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#e8c894]" />
           </button>
         </div>
       </header>
@@ -158,27 +219,31 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
             return (
               <div
                 key={day.key}
-                className={`min-h-0 flex items-center gap-1.5 px-2 py-1 rounded-xl border transition-all overflow-hidden ${
+                onClick={() => handleDayClick(day.key)}
+                className={`min-h-0 flex items-center gap-2 px-2 py-1 rounded-xl border transition-all overflow-hidden ${
+                  !isLocked ? 'cursor-pointer hover:border-[#b8853e] hover:shadow-2xs active:scale-[0.995]' : ''
+                } ${
                   day.isToday
                     ? 'bg-[#f3e6cf] border-[#c49755] ring-1 ring-[#c49755]/40 shadow-xs'
                     : day.isWeekend
                     ? 'bg-[#fcf7ee] border-[#dfd1bb]'
                     : 'bg-[#fffefc] border-[#e5d7c3]'
                 }`}
+                title={!isLocked ? `Kliknite pre úpravu dňa: ${day.fullLabel}` : day.fullLabel}
               >
                 {/* Day Badge */}
                 <div
-                  className={`w-11 sm:w-13 shrink-0 h-full flex flex-col items-center justify-center rounded-lg border leading-none py-0.5 ${
+                  className={`w-12 sm:w-14 shrink-0 h-full flex flex-col items-center justify-center rounded-lg border leading-none py-0.5 ${
                     day.isToday
                       ? 'bg-[#8d5b22] border-[#744917] text-[#fffef9]'
                       : 'bg-[#ede2cd] border-[#d8c8ab] text-[#3d2a19]'
                   }`}
                 >
-                  <span className="font-modern font-bold text-[11px] sm:text-xs tracking-wider uppercase">
+                  <span className="font-modern font-bold text-xs sm:text-sm tracking-wider uppercase">
                     {day.shortLabel}
                   </span>
                   <span
-                    className={`text-[9px] sm:text-[10px] font-mono mt-0.5 ${
+                    className={`text-[10px] sm:text-[11px] font-mono mt-0.5 ${
                       day.isToday ? 'text-[#f5ecd8]' : 'text-[#755e48]'
                     }`}
                   >
@@ -191,46 +256,46 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
                   )}
                 </div>
 
-                {/* 3 Meals in 1 Compact Row - Equal formatting, matching planner colors */}
+                {/* 3 Meals in 1 Compact Row - Larger font, rich text fill */}
                 <div className="flex-1 min-w-0 h-full flex flex-col justify-center gap-0.5">
-                  {/* R: Raňajky (Amber badge like planner) */}
-                  <div className="flex items-center gap-1 min-w-0 leading-none">
-                    <span className="shrink-0 w-3.5 h-3.5 rounded flex items-center justify-center text-[9px] font-bold bg-amber-500/15 text-amber-700 border border-amber-500/30">
+                  {/* R: Raňajky */}
+                  <div className="flex items-center gap-1.5 min-w-0 leading-none">
+                    <span className="shrink-0 w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold bg-amber-500/15 text-amber-700 border border-amber-500/30">
                       R
                     </span>
-                    <div className="flex-1 min-w-0 text-[11px] sm:text-xs text-[#2a1d12]">
+                    <div className="flex-1 min-w-0 text-xs sm:text-sm font-semibold text-[#1e130a]">
                       {meals.breakfast ? (
                         <MarqueeText text={meals.breakfast} speed={25} />
                       ) : (
-                        <span className="text-[#a48e78] italic">—</span>
+                        <span className="text-[#9a8570] font-normal italic text-[11px] sm:text-xs">—</span>
                       )}
                     </div>
                   </div>
 
-                  {/* O: Obed (Blue badge like planner, identical formatting to R & V) */}
-                  <div className="flex items-center gap-1 min-w-0 leading-none">
-                    <span className="shrink-0 w-3.5 h-3.5 rounded flex items-center justify-center text-[9px] font-bold bg-blue-500/15 text-blue-700 border border-blue-500/30">
+                  {/* O: Obed */}
+                  <div className="flex items-center gap-1.5 min-w-0 leading-none">
+                    <span className="shrink-0 w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold bg-blue-500/15 text-blue-700 border border-blue-500/30">
                       O
                     </span>
-                    <div className="flex-1 min-w-0 text-[11px] sm:text-xs text-[#2a1d12]">
+                    <div className="flex-1 min-w-0 text-xs sm:text-sm font-semibold text-[#1e130a]">
                       {meals.lunch ? (
                         <MarqueeText text={meals.lunch} speed={25} />
                       ) : (
-                        <span className="text-[#a48e78] italic">—</span>
+                        <span className="text-[#9a8570] font-normal italic text-[11px] sm:text-xs">—</span>
                       )}
                     </div>
                   </div>
 
-                  {/* V: Večera (Emerald badge like planner) */}
-                  <div className="flex items-center gap-1 min-w-0 leading-none">
-                    <span className="shrink-0 w-3.5 h-3.5 rounded flex items-center justify-center text-[9px] font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+                  {/* V: Večera */}
+                  <div className="flex items-center gap-1.5 min-w-0 leading-none">
+                    <span className="shrink-0 w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
                       V
                     </span>
-                    <div className="flex-1 min-w-0 text-[11px] sm:text-xs text-[#2a1d12]">
+                    <div className="flex-1 min-w-0 text-xs sm:text-sm font-semibold text-[#1e130a]">
                       {meals.dinner ? (
                         <MarqueeText text={meals.dinner} speed={25} />
                       ) : (
-                        <span className="text-[#a48e78] italic">—</span>
+                        <span className="text-[#9a8570] font-normal italic text-[11px] sm:text-xs">—</span>
                       )}
                     </div>
                   </div>
@@ -250,13 +315,17 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
             return (
               <div
                 key={day.key}
+                onClick={() => handleDayClick(day.key)}
                 className={`flex flex-col h-full rounded-2xl border overflow-hidden transition-all shadow-2xs ${
+                  !isLocked ? 'cursor-pointer hover:border-[#b8853e] hover:shadow-md' : ''
+                } ${
                   day.isToday
                     ? 'bg-[#f4e6d0] border-[#b8853e] ring-2 ring-[#b8853e]/30'
                     : day.isWeekend
                     ? 'bg-[#faf4e9] border-[#e2d4be]'
                     : 'bg-[#fffefc] border-[#e6d8c4]'
                 }`}
+                title={!isLocked ? `Kliknite pre úpravu dňa: ${day.fullLabel}` : day.fullLabel}
               >
                 {/* Column Day Header */}
                 <div
@@ -267,7 +336,7 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
                   }`}
                 >
                   <div>
-                    <div className="font-modern font-bold text-sm tracking-wide text-[#281a0e] uppercase">
+                    <div className="font-modern font-bold text-base tracking-wide text-[#281a0e] uppercase">
                       {day.fullLabel}
                     </div>
                     <div className="text-xs font-mono text-[#78614a]">
@@ -281,67 +350,67 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
                   )}
                 </div>
 
-                {/* 3 Meals in Column - All 3 identical size and weight */}
+                {/* 3 Meals in Column - Larger font filling the card */}
                 <div className="flex-1 min-h-0 p-2.5 flex flex-col justify-between gap-2 overflow-hidden">
                   {/* Raňajky Card */}
-                  <div className={`flex-1 min-h-0 flex flex-col justify-center rounded-xl p-2 border ${
+                  <div className={`flex-1 min-h-0 flex flex-col justify-center rounded-xl p-2.5 border ${
                     day.isToday ? 'bg-[#faeedd] border-[#dfcfb9]' : 'bg-[#f9f3e7] border-[#ebdcc7]'
                   }`}>
                     <div className="flex items-center gap-1.5 mb-1">
-                      <span className="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold bg-amber-500/15 text-amber-700 border border-amber-500/30">
+                      <span className="w-4.5 h-4.5 rounded flex items-center justify-center text-xs font-bold bg-amber-500/15 text-amber-700 border border-amber-500/30">
                         R
                       </span>
-                      <span className="text-[10px] font-modern font-bold tracking-wider uppercase text-amber-800">
+                      <span className="text-xs font-modern font-bold tracking-wider uppercase text-amber-800">
                         Raňajky
                       </span>
                     </div>
-                    <div className="text-xs text-[#2a1d12] font-medium leading-snug">
+                    <div className="text-sm sm:text-base text-[#1b1107] font-semibold leading-snug">
                       {meals.breakfast ? (
                         <MarqueeText text={meals.breakfast} speed={25} />
                       ) : (
-                        <span className="text-[#a48e78] italic text-xs">—</span>
+                        <span className="text-[#9a8570] font-normal italic text-xs">—</span>
                       )}
                     </div>
                   </div>
 
-                  {/* Obed Card (Identical layout to Raňajky & Večera) */}
-                  <div className={`flex-1 min-h-0 flex flex-col justify-center rounded-xl p-2 border ${
+                  {/* Obed Card */}
+                  <div className={`flex-1 min-h-0 flex flex-col justify-center rounded-xl p-2.5 border ${
                     day.isToday ? 'bg-[#faeedd] border-[#dfcfb9]' : 'bg-[#f9f3e7] border-[#ebdcc7]'
                   }`}>
                     <div className="flex items-center gap-1.5 mb-1">
-                      <span className="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold bg-blue-500/15 text-blue-700 border border-blue-500/30">
+                      <span className="w-4.5 h-4.5 rounded flex items-center justify-center text-xs font-bold bg-blue-500/15 text-blue-700 border border-blue-500/30">
                         O
                       </span>
-                      <span className="text-[10px] font-modern font-bold tracking-wider uppercase text-blue-800">
+                      <span className="text-xs font-modern font-bold tracking-wider uppercase text-blue-800">
                         Obed
                       </span>
                     </div>
-                    <div className="text-xs text-[#2a1d12] font-medium leading-snug">
+                    <div className="text-sm sm:text-base text-[#1b1107] font-semibold leading-snug">
                       {meals.lunch ? (
                         <MarqueeText text={meals.lunch} speed={25} />
                       ) : (
-                        <span className="text-[#a48e78] italic text-xs">—</span>
+                        <span className="text-[#9a8570] font-normal italic text-xs">—</span>
                       )}
                     </div>
                   </div>
 
                   {/* Večera Card */}
-                  <div className={`flex-1 min-h-0 flex flex-col justify-center rounded-xl p-2 border ${
+                  <div className={`flex-1 min-h-0 flex flex-col justify-center rounded-xl p-2.5 border ${
                     day.isToday ? 'bg-[#faeedd] border-[#dfcfb9]' : 'bg-[#f9f3e7] border-[#ebdcc7]'
                   }`}>
                     <div className="flex items-center gap-1.5 mb-1">
-                      <span className="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+                      <span className="w-4.5 h-4.5 rounded flex items-center justify-center text-xs font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
                         V
                       </span>
-                      <span className="text-[10px] font-modern font-bold tracking-wider uppercase text-emerald-800">
+                      <span className="text-xs font-modern font-bold tracking-wider uppercase text-emerald-800">
                         Večera
                       </span>
                     </div>
-                    <div className="text-xs text-[#2a1d12] font-medium leading-snug">
+                    <div className="text-sm sm:text-base text-[#1b1107] font-semibold leading-snug">
                       {meals.dinner ? (
                         <MarqueeText text={meals.dinner} speed={25} />
                       ) : (
-                        <span className="text-[#a48e78] italic text-xs">—</span>
+                        <span className="text-[#9a8570] font-normal italic text-xs">—</span>
                       )}
                     </div>
                   </div>
@@ -351,6 +420,20 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
           })}
         </div>
       </main>
+
+      {/* 📝 Single-Day Edit Modal */}
+      {selectedDayForEdit && (
+        <EditDayModal
+          isOpen={!!selectedDayForEdit}
+          dayKey={selectedDayForEdit}
+          weekId={currentWeekId}
+          meals={plan.days[selectedDayForEdit] || { breakfast: '', lunch: '', dinner: '' }}
+          onUpdateMeal={onUpdateMeal}
+          onOpenBottomSheet={onOpenBottomSheet}
+          getSuggestions={getSuggestions}
+          onClose={() => setSelectedDayForEdit(null)}
+        />
+      )}
     </div>
   );
 };

@@ -146,6 +146,9 @@ export function App() {
           onOpenEditor={handleOpenEditor}
           onOpenCatalog={() => setIsCatalogOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
+          onUpdateMeal={updateMeal}
+          onOpenBottomSheet={handleOpenBottomSheet}
+          getSuggestions={getSuggestions}
         />
       ) : (
         /* ✏️ Interactive Planning & Editing Screen */
