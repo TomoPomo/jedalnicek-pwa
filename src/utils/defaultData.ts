@@ -60,59 +60,7 @@ export const CATEGORIES: CategoryMeta[] = [
   },
 ];
 
-export const INITIAL_DISHES: Dish[] = [
-  // Kuracie
-  { id: 'k1', name: 'Kurací plátok na prírodno', category: 'kuracie', is_favorite: true },
-  { id: 'k2', name: 'Kuracie rezne v cestíčku', category: 'kuracie', is_favorite: true },
-  { id: 'k3', name: 'Kuracie soté so zeleninou', category: 'kuracie' },
-  { id: 'k4', name: 'Pečené kuracie stehná s cesnakom', category: 'kuracie' },
-  { id: 'k5', name: 'Kuracie kari s kokosovým mliekom', category: 'kuracie', is_favorite: true },
-  { id: 'k6', name: 'Šalát Caesar s grilovaným kuraťom', category: 'kuracie' },
-  { id: 'k7', name: 'Kuracie na paprike (paprikáš)', category: 'kuracie' },
-
-  // Hovädzie
-  { id: 'h1', name: 'Hovädzí guláš s knedľou', category: 'hovadzie', is_favorite: true },
-  { id: 'h2', name: 'Sviečková na smotane', category: 'hovadzie', is_favorite: true },
-  { id: 'h3', name: 'Hovädzie na hubách', category: 'hovadzie' },
-  { id: 'h4', name: 'Hovädzí burger s cibuľkou', category: 'hovadzie' },
-  { id: 'h5', name: 'Bolognese špagety s parmezánom', category: 'hovadzie', is_favorite: true },
-  { id: 'h6', name: 'Chilli con carne', category: 'hovadzie' },
-
-  // Prílohy
-  { id: 'p1', name: 'Jazmínová ryža', category: 'prilohy', is_favorite: true },
-  { id: 'p2', name: 'Pečené zemiaky s rozmarínom', category: 'prilohy', is_favorite: true },
-  { id: 'p3', name: 'Zemiaková kaša s maslom', category: 'prilohy', is_favorite: true },
-  { id: 'p4', name: 'Domáce hranolky', category: 'prilohy' },
-  { id: 'p5', name: 'Parená knedľa', category: 'prilohy' },
-  { id: 'p6', name: 'Kuskus so sušenými paradajkami', category: 'prilohy' },
-  { id: 'p7', name: 'Bulgur so zeleninou', category: 'prilohy' },
-  { id: 'p8', name: 'Cestoviny penne', category: 'prilohy' },
-
-  // Oblohy
-  { id: 'o1', name: 'Uhorkový šalát s cesnakom', category: 'oblohy', is_favorite: true },
-  { id: 'o2', name: 'Miešaný listový šalát s dresingom', category: 'oblohy', is_favorite: true },
-  { id: 'o3', name: 'Paradajkový šalát s cibuľkou', category: 'oblohy' },
-  { id: 'o4', name: 'Kyslé uhorky a feferónky', category: 'oblohy' },
-  { id: 'o5', name: 'Grilovaná cuketa a paprika', category: 'oblohy' },
-  { id: 'o6', name: 'Coleslaw šalát', category: 'oblohy', is_favorite: true },
-
-  // Bezmäsité
-  { id: 'b1', name: 'Vyprážaný syr s tatárskou omáčkou', category: 'bezmasite', is_favorite: true },
-  { id: 'b2', name: 'Bryndzové halušky so slaninkou', category: 'bezmasite', is_favorite: true },
-  { id: 'b3', name: 'Krémové hríbové rizoto', category: 'bezmasite' },
-  { id: 'b4', name: 'Tofu stir-fry s brokolicou a teriyaki', category: 'bezmasite' },
-  { id: 'b5', name: 'Cícerové kari so špenátom', category: 'bezmasite' },
-  { id: 'b6', name: 'Špenátové halušky so syrovou omáčkou', category: 'bezmasite' },
-  { id: 'b7', name: 'Zapekaná brokolica so zemiakmi', category: 'bezmasite' },
-
-  // Dezerty
-  { id: 'd1', name: 'Domáca jablková štrúdľa', category: 'dezerty', is_favorite: true },
-  { id: 'd2', name: 'Tvarohový koláč s ovocím', category: 'dezerty' },
-  { id: 'd3', name: 'Palacinky s džemom a nutellou', category: 'dezerty', is_favorite: true },
-  { id: 'd4', name: 'Čokoládové brownies s orechmi', category: 'dezerty' },
-  { id: 'd5', name: 'Panna Cotta s malinovým prelivom', category: 'dezerty' },
-  { id: 'd6', name: 'Krupicová kaša so škoricou a maslom', category: 'dezerty' },
-];
+export const INITIAL_DISHES: Dish[] = [];
 
 export function createEmptyDays(): WeekDays {
   return {

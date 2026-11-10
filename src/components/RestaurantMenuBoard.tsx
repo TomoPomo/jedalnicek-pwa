@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
-  Edit3,
   BookOpen,
   Settings,
   Calendar,
   Lock,
   Unlock,
+  Copy,
+  Trash2,
 } from 'lucide-react';
 import { WeekPlan, DayKey, MealType, Dish } from '../types';
 import { getDaysForWeek, formatWeekRange, getISOWeekInfo, shiftWeekId } from '../utils/dateUtils';
@@ -22,9 +23,10 @@ interface RestaurantMenuBoardProps {
   syncStatus: SyncStatus;
   activeUsers: PresenceUser[];
   onChangeWeek: (weekId: string) => void;
-  onOpenEditor: (day?: DayKey, meal?: MealType) => void;
   onOpenCatalog: () => void;
   onOpenSettings: () => void;
+  onRequestCopyWeek: () => void;
+  onRequestClearWeek: () => void;
   onUpdateMeal: (day: DayKey, mealType: MealType, text: string, immediate?: boolean) => void;
   onOpenBottomSheet: (day: DayKey, mealType: MealType) => void;
   getSuggestions: (query: string, limit?: number) => Dish[];
@@ -37,9 +39,10 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
   syncStatus,
   activeUsers,
   onChangeWeek,
-  onOpenEditor,
   onOpenCatalog,
   onOpenSettings,
+  onRequestCopyWeek,
+  onRequestClearWeek,
   onUpdateMeal,
   onOpenBottomSheet,
   getSuggestions,
@@ -53,7 +56,7 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
   const [isLocked, setIsLocked] = useState<boolean>(() => {
     try {
       const stored = localStorage.getItem('jedalnicek_menu_locked');
-      return stored !== null ? stored === 'true' : false; // Default to unlocked for immediate convenience
+      return stored !== null ? stored === 'true' : false; // Default to unlocked
     } catch {
       return false;
     }
@@ -78,10 +81,20 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
     }
   };
 
+  // Helper to split multi-line meals (e.g. Polievka + Hlavné jedlo or Raňajky + Desiata)
+  const parseMealLines = (text: string) => {
+    if (!text) return { line1: '', line2: '' };
+    const parts = text.split('\n');
+    return {
+      line1: parts[0] || '',
+      line2: parts.slice(1).join(' • ') || '',
+    };
+  };
+
   return (
     <div className="h-full w-full flex flex-col bg-[#f5efe4] text-[#241a12] overflow-hidden select-none font-sans">
       {/* 🧭 Ultra-Compact, Narrow Top Bar (Icons Only) */}
-      <header className="shrink-0 bg-[#faf6ee] border-b border-[#e2d5c0] px-2.5 sm:px-4 py-1.5 pt-safe flex items-center justify-between gap-1 shadow-2xs">
+      <header className="shrink-0 bg-[#faf6ee] border-b border-[#e2d5c0] px-2 sm:px-4 py-1.5 pt-safe flex items-center justify-between gap-1 shadow-2xs">
         {/* Left: Compact Week Navigation & Date */}
         <div className="flex items-center gap-1">
           <div className="flex items-center bg-[#eae0cb] border border-[#d5c5a7] rounded-lg p-0.5 shadow-2xs">
@@ -143,8 +156,8 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
             }`}
             title={
               isLocked
-                ? 'Úpravy dňa sú zamknuté (kliknite pre odomknutie)'
-                : 'Úpravy dňa sú odomknuté (kliknutím na deň môžete editovať)'
+                ? 'Úpravy sú zamknuté (kliknite pre odomknutie)'
+                : 'Úpravy sú odomknuté (kliknutím na deň môžete editovať jedlá)'
             }
             aria-label={isLocked ? 'Odomknúť úpravy' : 'Zamknúť úpravy'}
           >
@@ -153,6 +166,28 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
             ) : (
               <Unlock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-800" />
             )}
+          </button>
+
+          {/* Copy Week Button */}
+          <button
+            type="button"
+            onClick={onRequestCopyWeek}
+            className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#eae0cb] hover:bg-[#ded1b6] text-[#57422f] hover:text-[#1f160e] border border-[#d5c5a7] transition-colors"
+            title="Kopírovať plán do budúceho týždňa"
+            aria-label="Kopírovať plán"
+          >
+            <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-700" />
+          </button>
+
+          {/* Clear Week Button */}
+          <button
+            type="button"
+            onClick={onRequestClearWeek}
+            className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#eae0cb] hover:bg-[#ded1b6] text-[#57422f] hover:text-red-700 border border-[#d5c5a7] transition-colors"
+            title="Vyčistiť tento týždeň"
+            aria-label="Vyčistiť týždeň"
+          >
+            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-600" />
           </button>
 
           {/* Sync indicator */}
@@ -196,31 +231,23 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
           >
             <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
-
-          {/* ✏️ MAIN EDIT BUTTON (Switches to full planner) */}
-          <button
-            type="button"
-            onClick={() => onOpenEditor()}
-            className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#2e1f13] hover:bg-[#1a110a] text-[#fbf6ee] shadow-sm active:scale-95 transition-all border border-[#20150d]"
-            title="Prepnúť do plánovača jedálnička"
-            aria-label="Plánovač"
-          >
-            <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#e8c894]" />
-          </button>
         </div>
       </header>
 
-      {/* 📱 Mobile Layout (100% on 1 screen without scrolling, 7 rows) */}
+      {/* 📱 Mobile Layout (100% on 1 screen without scrolling, 7 rows, 2-line R & O supported) */}
       <main className="lg:hidden flex-1 min-h-0 p-1 flex flex-col overflow-hidden">
         <div className="flex-1 grid grid-rows-7 gap-1 h-full min-h-0">
           {daysInfo.map((day) => {
             const meals = plan.days[day.key] || { breakfast: '', lunch: '', dinner: '' };
+            const b = parseMealLines(meals.breakfast);
+            const l = parseMealLines(meals.lunch);
+            const d = parseMealLines(meals.dinner);
 
             return (
               <div
                 key={day.key}
                 onClick={() => handleDayClick(day.key)}
-                className={`min-h-0 flex items-center gap-2 px-2 py-1 rounded-xl border transition-all overflow-hidden ${
+                className={`min-h-0 flex items-center gap-1.5 px-2 py-0.5 rounded-xl border transition-all overflow-hidden ${
                   !isLocked ? 'cursor-pointer hover:border-[#b8853e] hover:shadow-2xs active:scale-[0.995]' : ''
                 } ${
                   day.isToday
@@ -233,17 +260,17 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
               >
                 {/* Day Badge */}
                 <div
-                  className={`w-12 sm:w-14 shrink-0 h-full flex flex-col items-center justify-center rounded-lg border leading-none py-0.5 ${
+                  className={`w-11 sm:w-13 shrink-0 h-full flex flex-col items-center justify-center rounded-lg border leading-none py-0.5 ${
                     day.isToday
                       ? 'bg-[#8d5b22] border-[#744917] text-[#fffef9]'
                       : 'bg-[#ede2cd] border-[#d8c8ab] text-[#3d2a19]'
                   }`}
                 >
-                  <span className="font-modern font-bold text-xs sm:text-sm tracking-wider uppercase">
+                  <span className="font-modern font-bold text-xs tracking-wider uppercase">
                     {day.shortLabel}
                   </span>
                   <span
-                    className={`text-[10px] sm:text-[11px] font-mono mt-0.5 ${
+                    className={`text-[9px] sm:text-[10px] font-mono mt-0.5 ${
                       day.isToday ? 'text-[#f5ecd8]' : 'text-[#755e48]'
                     }`}
                   >
@@ -256,46 +283,71 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
                   )}
                 </div>
 
-                {/* 3 Meals in 1 Compact Row - Larger font, rich text fill */}
-                <div className="flex-1 min-w-0 h-full flex flex-col justify-center gap-0.5">
-                  {/* R: Raňajky */}
-                  <div className="flex items-center gap-1.5 min-w-0 leading-none">
-                    <span className="shrink-0 w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold bg-amber-500/15 text-amber-700 border border-amber-500/30">
+                {/* 3 Meals in 1 Compact Row - 2-line support for R and O */}
+                <div className="flex-1 min-w-0 h-full flex flex-col justify-around py-0.5 leading-none">
+                  {/* R: Raňajky (Line 1: Raňajky, Line 2: Desiata) */}
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="shrink-0 w-3.5 h-3.5 rounded flex items-center justify-center text-[9px] font-bold bg-amber-500/15 text-amber-700 border border-amber-500/30">
                       R
                     </span>
-                    <div className="flex-1 min-w-0 text-xs sm:text-sm font-semibold text-[#1e130a]">
-                      {meals.breakfast ? (
-                        <MarqueeText text={meals.breakfast} speed={25} />
+                    <div className="flex-1 min-w-0 flex items-baseline gap-1.5 text-xs text-[#1e130a]">
+                      {b.line1 ? (
+                        <>
+                          <div className="truncate font-semibold">{b.line1}</div>
+                          {b.line2 && (
+                            <span className="shrink-0 text-[10px] text-amber-800/80 font-normal italic truncate">
+                              + {b.line2}
+                            </span>
+                          )}
+                        </>
                       ) : (
-                        <span className="text-[#9a8570] font-normal italic text-[11px] sm:text-xs">—</span>
+                        <span className="text-[#9a8570] font-normal italic text-[11px]">—</span>
                       )}
                     </div>
                   </div>
 
-                  {/* O: Obed */}
-                  <div className="flex items-center gap-1.5 min-w-0 leading-none">
-                    <span className="shrink-0 w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold bg-blue-500/15 text-blue-700 border border-blue-500/30">
+                  {/* O: Obed (Line 1: Polievka, Line 2: Hlavné jedlo) */}
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="shrink-0 w-3.5 h-3.5 rounded flex items-center justify-center text-[9px] font-bold bg-blue-500/15 text-blue-700 border border-blue-500/30">
                       O
                     </span>
-                    <div className="flex-1 min-w-0 text-xs sm:text-sm font-semibold text-[#1e130a]">
-                      {meals.lunch ? (
-                        <MarqueeText text={meals.lunch} speed={25} />
+                    <div className="flex-1 min-w-0 flex items-baseline gap-1.5 text-xs text-[#1e130a]">
+                      {l.line1 ? (
+                        <>
+                          {l.line2 ? (
+                            <>
+                              <span className="shrink-0 text-[10px] text-blue-900/80 font-medium italic truncate">
+                                🍲 {l.line1} &bull;
+                              </span>
+                              <div className="truncate font-semibold">{l.line2}</div>
+                            </>
+                          ) : (
+                            <div className="truncate font-semibold">{l.line1}</div>
+                          )}
+                        </>
                       ) : (
-                        <span className="text-[#9a8570] font-normal italic text-[11px] sm:text-xs">—</span>
+                        <span className="text-[#9a8570] font-normal italic text-[11px]">—</span>
                       )}
                     </div>
                   </div>
 
                   {/* V: Večera */}
-                  <div className="flex items-center gap-1.5 min-w-0 leading-none">
-                    <span className="shrink-0 w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="shrink-0 w-3.5 h-3.5 rounded flex items-center justify-center text-[9px] font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
                       V
                     </span>
-                    <div className="flex-1 min-w-0 text-xs sm:text-sm font-semibold text-[#1e130a]">
-                      {meals.dinner ? (
-                        <MarqueeText text={meals.dinner} speed={25} />
+                    <div className="flex-1 min-w-0 flex items-baseline gap-1.5 text-xs text-[#1e130a]">
+                      {d.line1 ? (
+                        <>
+                          <div className="truncate font-semibold">{d.line1}</div>
+                          {d.line2 && (
+                            <span className="shrink-0 text-[10px] text-emerald-800/80 font-normal italic truncate">
+                              + {d.line2}
+                            </span>
+                          )}
+                        </>
                       ) : (
-                        <span className="text-[#9a8570] font-normal italic text-[11px] sm:text-xs">—</span>
+                        <span className="text-[#9a8570] font-normal italic text-[11px]">—</span>
                       )}
                     </div>
                   </div>
@@ -311,6 +363,9 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
         <div className="flex-1 grid grid-cols-7 gap-2.5 h-full min-h-0">
           {daysInfo.map((day) => {
             const meals = plan.days[day.key] || { breakfast: '', lunch: '', dinner: '' };
+            const b = parseMealLines(meals.breakfast);
+            const l = parseMealLines(meals.lunch);
+            const d = parseMealLines(meals.dinner);
 
             return (
               <div
@@ -350,46 +405,70 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
                   )}
                 </div>
 
-                {/* 3 Meals in Column - Larger font filling the card */}
+                {/* 3 Meals in Column - Two lines for Raňajky, Obed, Večera */}
                 <div className="flex-1 min-h-0 p-2.5 flex flex-col justify-between gap-2 overflow-hidden">
                   {/* Raňajky Card */}
                   <div className={`flex-1 min-h-0 flex flex-col justify-center rounded-xl p-2.5 border ${
                     day.isToday ? 'bg-[#faeedd] border-[#dfcfb9]' : 'bg-[#f9f3e7] border-[#ebdcc7]'
                   }`}>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="w-4.5 h-4.5 rounded flex items-center justify-center text-xs font-bold bg-amber-500/15 text-amber-700 border border-amber-500/30">
+                    <div className="flex items-center gap-1.5 mb-1 shrink-0">
+                      <span className="w-4 h-4 rounded flex items-center justify-center text-xs font-bold bg-amber-500/15 text-amber-700 border border-amber-500/30">
                         R
                       </span>
                       <span className="text-xs font-modern font-bold tracking-wider uppercase text-amber-800">
-                        Raňajky
+                        Raňajky & Desiata
                       </span>
                     </div>
-                    <div className="text-sm sm:text-base text-[#1b1107] font-semibold leading-snug">
-                      {meals.breakfast ? (
-                        <MarqueeText text={meals.breakfast} speed={25} />
-                      ) : (
-                        <span className="text-[#9a8570] font-normal italic text-xs">—</span>
+
+                    <div className="space-y-0.5 min-h-0 overflow-hidden">
+                      <div className="text-sm font-semibold text-[#1b1107] leading-snug">
+                        {b.line1 ? (
+                          <MarqueeText text={b.line1} speed={25} />
+                        ) : (
+                          <span className="text-[#9a8570] font-normal italic text-xs">—</span>
+                        )}
+                      </div>
+                      {b.line2 && (
+                        <div className="text-xs text-amber-900/80 font-medium italic flex items-center gap-1 truncate">
+                          <span>🍎</span>
+                          <span className="truncate">{b.line2}</span>
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Obed Card */}
+                  {/* Obed Card (Polievka + Hlavné jedlo) */}
                   <div className={`flex-1 min-h-0 flex flex-col justify-center rounded-xl p-2.5 border ${
                     day.isToday ? 'bg-[#faeedd] border-[#dfcfb9]' : 'bg-[#f9f3e7] border-[#ebdcc7]'
                   }`}>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="w-4.5 h-4.5 rounded flex items-center justify-center text-xs font-bold bg-blue-500/15 text-blue-700 border border-blue-500/30">
+                    <div className="flex items-center gap-1.5 mb-1 shrink-0">
+                      <span className="w-4 h-4 rounded flex items-center justify-center text-xs font-bold bg-blue-500/15 text-blue-700 border border-blue-500/30">
                         O
                       </span>
                       <span className="text-xs font-modern font-bold tracking-wider uppercase text-blue-800">
-                        Obed
+                        Obed & Polievka
                       </span>
                     </div>
-                    <div className="text-sm sm:text-base text-[#1b1107] font-semibold leading-snug">
-                      {meals.lunch ? (
-                        <MarqueeText text={meals.lunch} speed={25} />
+
+                    <div className="space-y-0.5 min-h-0 overflow-hidden">
+                      {l.line2 ? (
+                        <>
+                          <div className="text-xs text-blue-900 font-medium flex items-center gap-1 truncate">
+                            <span>🍲</span>
+                            <span className="truncate">{l.line1}</span>
+                          </div>
+                          <div className="text-sm sm:text-base text-[#1b1107] font-semibold leading-snug">
+                            <MarqueeText text={l.line2} speed={25} />
+                          </div>
+                        </>
                       ) : (
-                        <span className="text-[#9a8570] font-normal italic text-xs">—</span>
+                        <div className="text-sm sm:text-base text-[#1b1107] font-semibold leading-snug">
+                          {l.line1 ? (
+                            <MarqueeText text={l.line1} speed={25} />
+                          ) : (
+                            <span className="text-[#9a8570] font-normal italic text-xs">—</span>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -398,19 +477,27 @@ export const RestaurantMenuBoard: React.FC<RestaurantMenuBoardProps> = ({
                   <div className={`flex-1 min-h-0 flex flex-col justify-center rounded-xl p-2.5 border ${
                     day.isToday ? 'bg-[#faeedd] border-[#dfcfb9]' : 'bg-[#f9f3e7] border-[#ebdcc7]'
                   }`}>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="w-4.5 h-4.5 rounded flex items-center justify-center text-xs font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+                    <div className="flex items-center gap-1.5 mb-1 shrink-0">
+                      <span className="w-4 h-4 rounded flex items-center justify-center text-xs font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
                         V
                       </span>
                       <span className="text-xs font-modern font-bold tracking-wider uppercase text-emerald-800">
                         Večera
                       </span>
                     </div>
-                    <div className="text-sm sm:text-base text-[#1b1107] font-semibold leading-snug">
-                      {meals.dinner ? (
-                        <MarqueeText text={meals.dinner} speed={25} />
-                      ) : (
-                        <span className="text-[#9a8570] font-normal italic text-xs">—</span>
+
+                    <div className="space-y-0.5 min-h-0 overflow-hidden">
+                      <div className="text-sm font-semibold text-[#1b1107] leading-snug">
+                        {d.line1 ? (
+                          <MarqueeText text={d.line1} speed={25} />
+                        ) : (
+                          <span className="text-[#9a8570] font-normal italic text-xs">—</span>
+                        )}
+                      </div>
+                      {d.line2 && (
+                        <div className="text-xs text-emerald-900/80 font-medium italic truncate">
+                          + {d.line2}
+                        </div>
                       )}
                     </div>
                   </div>

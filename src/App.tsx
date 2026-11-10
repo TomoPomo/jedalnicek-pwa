@@ -1,6 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Header } from './components/Header';
-import { WeekDashboard } from './components/WeekDashboard';
 import { RestaurantMenuBoard } from './components/RestaurantMenuBoard';
 import { BottomSheetDrawer } from './components/BottomSheetDrawer';
 import { MealCatalogModal } from './components/MealCatalogModal';
@@ -21,7 +19,6 @@ import { checkAndApplyUrlHashConfig } from './services/supabase';
 import { applyTheme } from './utils/theme';
 
 export function App() {
-  const [activeView, setActiveView] = useState<'menu' | 'editor'>('menu');
   const [currentWeekId, setCurrentWeekId] = useState<string>(() => getISOWeekInfo().weekId);
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => getCurrentUser());
   const [activeUsers, setActiveUsers] = useState<PresenceUser[]>([]);
@@ -122,58 +119,27 @@ export function App() {
     showToast('Jedálniček pre tento týždeň bol vyčistený.');
   };
 
-  const handleOpenEditor = (day?: DayKey, meal?: MealType) => {
-    setActiveView('editor');
-    if (day && meal) {
-      handleOpenBottomSheet(day, meal);
-    }
-  };
-
   const currentSlotValue =
     bottomSheetDay && bottomSheetMeal ? plan.days[bottomSheetDay]?.[bottomSheetMeal] || '' : '';
 
   return (
     <div className="h-full w-full flex flex-col bg-slate-50 text-slate-900 select-none transition-colors">
-      {activeView === 'menu' ? (
-        /* 🍽️ Initial Screen: Elegant Light Beige Restaurant Menu Board */
-        <RestaurantMenuBoard
-          plan={plan}
-          currentWeekId={currentWeekId}
-          isSaving={isSaving}
-          syncStatus={syncStatus}
-          activeUsers={activeUsers}
-          onChangeWeek={setCurrentWeekId}
-          onOpenEditor={handleOpenEditor}
-          onOpenCatalog={() => setIsCatalogOpen(true)}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-          onUpdateMeal={updateMeal}
-          onOpenBottomSheet={handleOpenBottomSheet}
-          getSuggestions={getSuggestions}
-        />
-      ) : (
-        /* ✏️ Interactive Planning & Editing Screen */
-        <>
-          <Header
-            currentWeekId={currentWeekId}
-            isSaving={isSaving}
-            syncStatus={syncStatus}
-            activeUsers={activeUsers}
-            onChangeWeek={setCurrentWeekId}
-            onBackToMenu={() => setActiveView('menu')}
-            onOpenCatalog={() => setIsCatalogOpen(true)}
-            onOpenSettings={() => setIsSettingsOpen(true)}
-            onRequestCopyWeek={() => setIsConfirmCopyOpen(true)}
-            onRequestClearWeek={() => setIsConfirmClearOpen(true)}
-          />
-
-          <WeekDashboard
-            plan={plan}
-            onUpdateMeal={updateMeal}
-            onOpenBottomSheet={handleOpenBottomSheet}
-            getSuggestions={getSuggestions}
-          />
-        </>
-      )}
+      {/* 🍽️ Sole Primary Screen: Weekly Menu Board with 2-line meals, Lock toggle & Day click edit */}
+      <RestaurantMenuBoard
+        plan={plan}
+        currentWeekId={currentWeekId}
+        isSaving={isSaving}
+        syncStatus={syncStatus}
+        activeUsers={activeUsers}
+        onChangeWeek={setCurrentWeekId}
+        onOpenCatalog={() => setIsCatalogOpen(true)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onRequestCopyWeek={() => setIsConfirmCopyOpen(true)}
+        onRequestClearWeek={() => setIsConfirmClearOpen(true)}
+        onUpdateMeal={updateMeal}
+        onOpenBottomSheet={handleOpenBottomSheet}
+        getSuggestions={getSuggestions}
+      />
 
       {/* Bottom Sheet Drawer for Meal Selection & Multi-Component Composer */}
       <BottomSheetDrawer

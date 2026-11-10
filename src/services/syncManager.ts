@@ -1,7 +1,7 @@
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { WeekPlan, Dish, UserProfile } from '../types';
 import { getSupabaseClient } from './supabase';
-import { INITIAL_DISHES, createEmptyWeek } from '../utils/defaultData';
+import { createEmptyWeek } from '../utils/defaultData';
 
 export type SyncStatus = 'connected' | 'local' | 'connecting' | 'offline';
 
@@ -397,17 +397,17 @@ class SyncManager {
     if (raw) {
       try {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+        if (Array.isArray(parsed)) {
+          // Filter out legacy sample mock dishes (ids like k1..k7, h1..h6, etc.) so only user dishes are preserved
+          const userDishes = parsed.filter((d: Dish) => !/^[khpobd][1-9]$/.test(d.id));
+          return userDishes;
         }
       } catch (e) {
         console.error('Error parsing dishes from storage', e);
       }
     }
 
-    // Seed default dishes
-    localStorage.setItem(STORAGE_KEY_DISHES, JSON.stringify(INITIAL_DISHES));
-    return INITIAL_DISHES;
+    return [];
   }
 
   public async fetchDishesFromSupabase(): Promise<Dish[] | null> {
@@ -420,8 +420,8 @@ class SyncManager {
         .select('*')
         .order('name');
 
-      if (!error && data && data.length > 0) {
-        const dishes = data as Dish[];
+      if (!error && data) {
+        const dishes = (data as Dish[]).filter((d) => !/^[khpobd][1-9]$/.test(d.id));
         localStorage.setItem(STORAGE_KEY_DISHES, JSON.stringify(dishes));
         this.notifyDishesSubscribers(dishes, false);
         return dishes;

@@ -4,13 +4,7 @@ import { SupabaseConfig } from '../types';
 const STORAGE_KEY_CONFIG = 'jedalnicek_supabase_config';
 
 export function getStoredSupabaseConfig(): SupabaseConfig {
-  const envUrl = import.meta.env.VITE_SUPABASE_URL || '';
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-  if (envUrl && envKey) {
-    return { url: envUrl, anonKey: envKey };
-  }
-
+  // Never read from build-time environment variables so Netlify builds never leak credentials to public visitors
   try {
     const raw = localStorage.getItem(STORAGE_KEY_CONFIG);
     if (raw) {
