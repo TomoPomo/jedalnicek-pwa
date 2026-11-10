@@ -144,16 +144,16 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-0 m-auto bg-white text-slate-900 border border-slate-200 rounded-2xl p-0 max-w-lg w-[95%] shadow-2xl backdrop:bg-slate-900/45 backdrop:backdrop-blur-sm z-50 animate-in fade-in zoom-in-95 duration-150 overflow-hidden flex flex-col max-h-[90dvh]"
+      className="app-modal-settings animate-in fade-in zoom-in-95 duration-150"
     >
       {/* Modal Header */}
-      <div className="px-4 py-3 bg-[#fbf7f0] border-b border-[#e5d8c3] flex items-center justify-between shrink-0">
+      <div className="px-4 sm:px-6 py-3.5 bg-[#fbf7f0] border-b border-[#e5d8c3] flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-[#2e1f13] text-[#fbf6ee] flex items-center justify-center shadow-xs">
             <Calendar className="w-4 h-4 text-[#e8c894]" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-slate-900 leading-tight">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
               {dayName} <span className="font-mono text-sm text-[#78614a] font-normal">({dateStr})</span>
             </h2>
             <p className="text-xs text-slate-500">Úprava jedál, polievok a snackov</p>
@@ -171,15 +171,15 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
       </div>
 
       {/* Modal Body - 3 Sections (Raňajky, Obed, Večera) each with 2 lines */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-3.5 sm:p-5 space-y-3.5 bg-slate-50/30">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/40">
         {/* 1. RAŇAJKY (Raňajky + Desiata / Snack) */}
-        <div className="bg-white border border-amber-200/70 rounded-xl p-3 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <span className="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold bg-amber-500/15 text-amber-700 border border-amber-500/30">
+        <div className="bg-white border border-amber-200/80 rounded-2xl p-3.5 sm:p-4 shadow-2xs space-y-2.5">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold bg-amber-500/15 text-amber-700 border border-amber-500/30">
                 R
               </span>
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
+              <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-amber-900">
                 Raňajky & Desiata
               </span>
             </div>
@@ -190,33 +190,33 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
                 onClose();
                 onOpenBottomSheet(dayKey, 'breakfast');
               }}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 border border-slate-200 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 border border-slate-200 transition-colors"
               title="Vybrať z knižnice receptov"
             >
-              <BookOpen className="w-3 h-3 text-amber-600" />
+              <BookOpen className="w-3.5 h-3.5 text-amber-600" />
               <span>Knižnica</span>
             </button>
           </div>
 
           {/* Line 1: Hlavné raňajky */}
           <div className="relative">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-semibold text-amber-900 w-16 shrink-0">1. Raňajky:</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-amber-950 w-20 shrink-0">1. Raňajky:</span>
               <div className="relative flex-1">
                 <input
                   type="text"
                   value={breakfastMain}
                   onChange={(e) => handleInputChange('b_main', e.target.value)}
                   placeholder="napr. Ovsená kaša s ovocím, Vajíčka..."
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 pr-7 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:bg-white transition-all shadow-2xs"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 pr-8 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:bg-white transition-all shadow-2xs"
                 />
                 {breakfastMain && (
                   <button
                     type="button"
                     onClick={() => handleInputChange('b_main', '')}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -224,13 +224,13 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
 
             {/* Suggestions dropdown */}
             {activeInputKey === 'b_main' && suggestions.length > 0 && (
-              <div className="absolute left-16 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
+              <div className="absolute left-20 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
                 {suggestions.map((dish) => (
                   <button
                     key={dish.id}
                     type="button"
                     onClick={() => handleSelectSuggestion('b_main', dish.name)}
-                    className="w-full text-left px-3 py-1.5 text-xs text-slate-800 hover:bg-amber-50 hover:text-amber-800 flex items-center justify-between"
+                    className="w-full text-left px-3 py-2 text-xs sm:text-sm text-slate-800 hover:bg-amber-50 hover:text-amber-800 flex items-center justify-between"
                   >
                     <span>{dish.name}</span>
                     <span className="text-[10px] text-slate-400 font-mono">Vybrať</span>
@@ -242,23 +242,23 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
 
           {/* Line 2: Desiata / Snack */}
           <div className="relative">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-semibold text-amber-800/80 w-16 shrink-0">2. Desiata:</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-amber-900/80 w-20 shrink-0">2. Desiata:</span>
               <div className="relative flex-1">
                 <input
                   type="text"
                   value={breakfastSnack}
                   onChange={(e) => handleInputChange('b_snack', e.target.value)}
                   placeholder="napr. Jablko, proteínový snack, oriešky..."
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 pr-7 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:bg-white transition-all shadow-2xs"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 pr-8 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:bg-white transition-all shadow-2xs"
                 />
                 {breakfastSnack && (
                   <button
                     type="button"
                     onClick={() => handleInputChange('b_snack', '')}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -266,13 +266,13 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
 
             {/* Suggestions dropdown */}
             {activeInputKey === 'b_snack' && suggestions.length > 0 && (
-              <div className="absolute left-16 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
+              <div className="absolute left-20 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
                 {suggestions.map((dish) => (
                   <button
                     key={dish.id}
                     type="button"
                     onClick={() => handleSelectSuggestion('b_snack', dish.name)}
-                    className="w-full text-left px-3 py-1.5 text-xs text-slate-800 hover:bg-amber-50 hover:text-amber-800 flex items-center justify-between"
+                    className="w-full text-left px-3 py-2 text-xs sm:text-sm text-slate-800 hover:bg-amber-50 hover:text-amber-800 flex items-center justify-between"
                   >
                     <span>{dish.name}</span>
                     <span className="text-[10px] text-slate-400 font-mono">Vybrať</span>
@@ -284,13 +284,13 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
         </div>
 
         {/* 2. OBED (Polievka + Hlavné jedlo) */}
-        <div className="bg-white border border-blue-200/70 rounded-xl p-3 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <span className="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold bg-blue-500/15 text-blue-700 border border-blue-500/30">
+        <div className="bg-white border border-blue-200/80 rounded-2xl p-3.5 sm:p-4 shadow-2xs space-y-2.5">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold bg-blue-500/15 text-blue-700 border border-blue-500/30">
                 O
               </span>
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-800">
+              <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-blue-900">
                 Obed: Polievka & Hlavné jedlo
               </span>
             </div>
@@ -301,33 +301,33 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
                 onClose();
                 onOpenBottomSheet(dayKey, 'lunch');
               }}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 border border-slate-200 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 border border-slate-200 transition-colors"
               title="Vybrať z knižnice receptov"
             >
-              <BookOpen className="w-3 h-3 text-blue-600" />
+              <BookOpen className="w-3.5 h-3.5 text-blue-600" />
               <span>Knižnica</span>
             </button>
           </div>
 
           {/* Line 1: Polievka */}
           <div className="relative">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-semibold text-blue-900 w-16 shrink-0">1. Polievka:</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-blue-950 w-20 shrink-0">1. Polievka:</span>
               <div className="relative flex-1">
                 <input
                   type="text"
                   value={lunchSoup}
                   onChange={(e) => handleInputChange('l_soup', e.target.value)}
                   placeholder="napr. Slepačí vývar, Šošovicová, Paradajková..."
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 pr-7 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-all shadow-2xs"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 pr-8 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-all shadow-2xs"
                 />
                 {lunchSoup && (
                   <button
                     type="button"
                     onClick={() => handleInputChange('l_soup', '')}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -335,13 +335,13 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
 
             {/* Suggestions dropdown */}
             {activeInputKey === 'l_soup' && suggestions.length > 0 && (
-              <div className="absolute left-16 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
+              <div className="absolute left-20 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
                 {suggestions.map((dish) => (
                   <button
                     key={dish.id}
                     type="button"
                     onClick={() => handleSelectSuggestion('l_soup', dish.name)}
-                    className="w-full text-left px-3 py-1.5 text-xs text-slate-800 hover:bg-blue-50 hover:text-blue-800 flex items-center justify-between"
+                    className="w-full text-left px-3 py-2 text-xs sm:text-sm text-slate-800 hover:bg-blue-50 hover:text-blue-800 flex items-center justify-between"
                   >
                     <span>{dish.name}</span>
                     <span className="text-[10px] text-slate-400 font-mono">Vybrať</span>
@@ -353,23 +353,23 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
 
           {/* Line 2: Hlavné jedlo */}
           <div className="relative">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-semibold text-blue-900 w-16 shrink-0">2. Hlavné:</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-blue-950 w-20 shrink-0">2. Hlavné:</span>
               <div className="relative flex-1">
                 <input
                   type="text"
                   value={lunchMain}
                   onChange={(e) => handleInputChange('l_main', e.target.value)}
                   placeholder="napr. Pečené kuracie stehno + ryža..."
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 pr-7 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-all shadow-2xs font-medium"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 pr-8 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-all shadow-2xs font-medium"
                 />
                 {lunchMain && (
                   <button
                     type="button"
                     onClick={() => handleInputChange('l_main', '')}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -377,13 +377,13 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
 
             {/* Suggestions dropdown */}
             {activeInputKey === 'l_main' && suggestions.length > 0 && (
-              <div className="absolute left-16 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
+              <div className="absolute left-20 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
                 {suggestions.map((dish) => (
                   <button
                     key={dish.id}
                     type="button"
                     onClick={() => handleSelectSuggestion('l_main', dish.name)}
-                    className="w-full text-left px-3 py-1.5 text-xs text-slate-800 hover:bg-blue-50 hover:text-blue-800 flex items-center justify-between"
+                    className="w-full text-left px-3 py-2 text-xs sm:text-sm text-slate-800 hover:bg-blue-50 hover:text-blue-800 flex items-center justify-between"
                   >
                     <span>{dish.name}</span>
                     <span className="text-[10px] text-slate-400 font-mono">Vybrať</span>
@@ -395,13 +395,13 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
         </div>
 
         {/* 3. VEČERA */}
-        <div className="bg-white border border-emerald-200/70 rounded-xl p-3 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <span className="w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+        <div className="bg-white border border-emerald-200/80 rounded-2xl p-3.5 sm:p-4 shadow-2xs space-y-2.5">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
                 V
               </span>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+              <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-emerald-900">
                 Večera & 2. Večera
               </span>
             </div>
@@ -412,33 +412,33 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
                 onClose();
                 onOpenBottomSheet(dayKey, 'dinner');
               }}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 border border-slate-200 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 border border-slate-200 transition-colors"
               title="Vybrať z knižnice receptov"
             >
-              <BookOpen className="w-3 h-3 text-emerald-600" />
+              <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
               <span>Knižnica</span>
             </button>
           </div>
 
           {/* Line 1: Hlavná večera */}
           <div className="relative">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-semibold text-emerald-900 w-16 shrink-0">1. Večera:</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-emerald-950 w-20 shrink-0">1. Večera:</span>
               <div className="relative flex-1">
                 <input
                   type="text"
                   value={dinnerMain}
                   onChange={(e) => handleInputChange('d_main', e.target.value)}
                   placeholder="napr. Grécky šalát s feta syrom, Cestoviny..."
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 pr-7 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all shadow-2xs"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 pr-8 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all shadow-2xs"
                 />
                 {dinnerMain && (
                   <button
                     type="button"
                     onClick={() => handleInputChange('d_main', '')}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -446,13 +446,13 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
 
             {/* Suggestions dropdown */}
             {activeInputKey === 'd_main' && suggestions.length > 0 && (
-              <div className="absolute left-16 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
+              <div className="absolute left-20 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
                 {suggestions.map((dish) => (
                   <button
                     key={dish.id}
                     type="button"
                     onClick={() => handleSelectSuggestion('d_main', dish.name)}
-                    className="w-full text-left px-3 py-1.5 text-xs text-slate-800 hover:bg-emerald-50 hover:text-emerald-800 flex items-center justify-between"
+                    className="w-full text-left px-3 py-2 text-xs sm:text-sm text-slate-800 hover:bg-emerald-50 hover:text-emerald-800 flex items-center justify-between"
                   >
                     <span>{dish.name}</span>
                     <span className="text-[10px] text-slate-400 font-mono">Vybrať</span>
@@ -464,23 +464,23 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
 
           {/* Line 2: 2. večera / snack (voliteľné) */}
           <div className="relative">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-semibold text-emerald-800/80 w-16 shrink-0">2. Večera:</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-emerald-900/80 w-20 shrink-0">2. Večera:</span>
               <div className="relative flex-1">
                 <input
                   type="text"
                   value={dinnerSnack}
                   onChange={(e) => handleInputChange('d_snack', e.target.value)}
                   placeholder="napr. Bylinkový čaj, tvaroh, ovocie..."
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 pr-7 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all shadow-2xs"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 pr-8 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all shadow-2xs"
                 />
                 {dinnerSnack && (
                   <button
                     type="button"
                     onClick={() => handleInputChange('d_snack', '')}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -488,13 +488,13 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
 
             {/* Suggestions dropdown */}
             {activeInputKey === 'd_snack' && suggestions.length > 0 && (
-              <div className="absolute left-16 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
+              <div className="absolute left-20 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden">
                 {suggestions.map((dish) => (
                   <button
                     key={dish.id}
                     type="button"
                     onClick={() => handleSelectSuggestion('d_snack', dish.name)}
-                    className="w-full text-left px-3 py-1.5 text-xs text-slate-800 hover:bg-emerald-50 hover:text-emerald-800 flex items-center justify-between"
+                    className="w-full text-left px-3 py-2 text-xs sm:text-sm text-slate-800 hover:bg-emerald-50 hover:text-emerald-800 flex items-center justify-between"
                   >
                     <span>{dish.name}</span>
                     <span className="text-[10px] text-slate-400 font-mono">Vybrať</span>
