@@ -18,26 +18,46 @@ export const MarqueeText: React.FC<MarqueeTextProps> = ({
   const [overflowDistance, setOverflowDistance] = useState(0);
 
   useEffect(() => {
+    const container = containerRef.current;
+    const textEl = textRef.current;
+    if (!container || !textEl) return;
+
     const checkOverflow = () => {
-      if (containerRef.current && textRef.current) {
-        const containerWidth = containerRef.current.clientWidth;
-        const textWidth = textRef.current.scrollWidth;
-        const diff = textWidth - containerWidth;
-        setOverflowDistance(diff > 4 ? diff : 0);
-      }
+      const containerWidth = container.clientWidth;
+      const textWidth = textEl.scrollWidth;
+      const diff = textWidth - containerWidth;
+      // If text exceeds container by more than 3px, enable floating animation
+      setOverflowDistance(diff > 3 ? diff : 0);
     };
 
+    // Initial check and next frame check for font rendering
     checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
+    const rafId = requestAnimationFrame(checkOverflow);
+
+    // Watch for container resizes (responsive flex layouts)
+    const resizeObserver = new ResizeObserver(() => {
+      checkOverflow();
+    });
+
+    resizeObserver.observe(container);
+    resizeObserver.observe(textEl);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(checkOverflow).catch(() => {});
+    }
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      resizeObserver.disconnect();
+    };
   }, [text]);
 
-  const duration = overflowDistance > 0 ? (overflowDistance / speed) : 0;
+  const duration = overflowDistance > 0 ? overflowDistance / speed : 0;
 
   return (
     <div
       ref={containerRef}
-      className={`overflow-hidden whitespace-nowrap relative max-w-full ${className}`}
+      className={`overflow-hidden whitespace-nowrap relative min-w-0 max-w-full ${className}`}
       title={text}
     >
       <span
@@ -46,8 +66,8 @@ export const MarqueeText: React.FC<MarqueeTextProps> = ({
         style={
           overflowDistance > 0
             ? ({
-                '--scroll-dist': `-${overflowDistance + 6}px`,
-                '--duration': `${Math.max(duration, 3.5)}s`,
+                '--scroll-dist': `-${overflowDistance + 8}px`,
+                '--duration': `${Math.max(duration + 2.5, 4.5)}s`,
                 '--pause-delay': `${pauseDuration / 1000}s`,
               } as React.CSSProperties)
             : undefined

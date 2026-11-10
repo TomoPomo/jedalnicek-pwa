@@ -42,23 +42,39 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
   const [activeInputKey, setActiveInputKey] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Dish[]>([]);
 
-  // Parse incoming meals into 2 lines
+  // Session ref to initialize form values ONLY when opening or switching days
+  const activeSessionRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (meals) {
-      const bParts = (meals.breakfast || '').split('\n');
-      setBreakfastMain(bParts[0] || '');
-      setBreakfastSnack(bParts[1] || '');
+    if (isOpen && dayKey) {
+      const sessionKey = `${dayKey}`;
+      if (activeSessionRef.current !== sessionKey) {
+        activeSessionRef.current = sessionKey;
+        if (meals) {
+          const bParts = (meals.breakfast || '').split('\n');
+          setBreakfastMain(bParts[0] || '');
+          setBreakfastSnack(bParts[1] || '');
 
-      const lParts = (meals.lunch || '').split('\n');
-      setLunchSoup(lParts[0] || '');
-      setLunchMain(lParts[1] || '');
+          const lParts = (meals.lunch || '').split('\n');
+          setLunchSoup(lParts[0] || '');
+          setLunchMain(lParts[1] || '');
 
-      const dParts = (meals.dinner || '').split('\n');
-      setDinnerMain(dParts[0] || '');
-      setDinnerSnack(dParts[1] || '');
+          const dParts = (meals.dinner || '').split('\n');
+          setDinnerMain(dParts[0] || '');
+          setDinnerSnack(dParts[1] || '');
+        } else {
+          setBreakfastMain('');
+          setBreakfastSnack('');
+          setLunchSoup('');
+          setLunchMain('');
+          setDinnerMain('');
+          setDinnerSnack('');
+        }
+      }
+    } else {
+      activeSessionRef.current = null;
     }
-    setActiveInputKey(null);
-  }, [meals, isOpen]);
+  }, [isOpen, dayKey, meals]);
 
   // Dialog open/close lifecycle
   useEffect(() => {
@@ -97,24 +113,32 @@ export const EditDayModal: React.FC<EditDayModalProps> = ({
   const dayName = currentDayInfo ? currentDayInfo.fullLabel : DAY_NAMES[dayKey].full;
   const dateStr = currentDayInfo ? currentDayInfo.dateStr : '';
 
+  // Helper to join 2 lines without stripping in-flight spaces
+  const joinLines = (line1: string, line2: string) => {
+    if (line1 && line2) return `${line1}\n${line2}`;
+    if (line1) return line1;
+    if (line2) return `\n${line2}`;
+    return '';
+  };
+
   const saveBreakfast = (main: string, snack: string) => {
     setBreakfastMain(main);
     setBreakfastSnack(snack);
-    const combined = [main.trim(), snack.trim()].filter(Boolean).join('\n');
+    const combined = joinLines(main, snack);
     onUpdateMeal(dayKey, 'breakfast', combined, false);
   };
 
   const saveLunch = (soup: string, main: string) => {
     setLunchSoup(soup);
     setLunchMain(main);
-    const combined = [soup.trim(), main.trim()].filter(Boolean).join('\n');
+    const combined = joinLines(soup, main);
     onUpdateMeal(dayKey, 'lunch', combined, false);
   };
 
   const saveDinner = (main: string, snack: string) => {
     setDinnerMain(main);
     setDinnerSnack(snack);
-    const combined = [main.trim(), snack.trim()].filter(Boolean).join('\n');
+    const combined = joinLines(main, snack);
     onUpdateMeal(dayKey, 'dinner', combined, false);
   };
 
